@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 黃家行事曆</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Helvetica Neue',sans-serif;background:#f5f5f3;color:#1a1a1a;padding:24px 16px;min-height:100vh}
+.container{max-width:860px;margin:0 auto}
+h1{font-size:20px;font-weight:500;margin-bottom:20px;color:#1a1a1a}
+.view-toggle{display:flex;gap:8px;margin-bottom:20px}
+.view-btn{flex:1;max-width:140px;font-size:15px;font-weight:500;padding:10px 0;border-radius:12px;border:2px solid #ccc;background:#f0f0ee;color:#888;cursor:pointer;transition:all .2s;text-align:center}
+.view-btn.on{border-color:#185FA5;background:#185FA5;color:#fff;box-shadow:0 3px 10px rgba(24,95,165,0.25)}
+.stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.stat{background:#fff;border-radius:8px;padding:10px 20px;text-align:center;min-width:80px;border:0.5px solid #e0e0da}
+.stat-label{font-size:12px;color:#888;margin-bottom:4px}
+.stat-num{font-size:26px;font-weight:500;color:#1a1a1a}
+.filter-section{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sched-btn{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid #888;background:transparent;color:#555;cursor:pointer;transition:all .18s;font-weight:500}
+.sched-btn.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.25)}
+.who-btn{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid transparent;cursor:pointer;transition:all .18s;font-weight:500}
+.who-d{background:#EAF3FC;color:#0C447C;border-color:#B5D4F4}
+.who-d.on{background:#185FA5;color:#fff;border-color:#185FA5;box-shadow:0 2px 8px rgba(24,95,165,0.35)}
+.who-a{background:#FEF3E2;color:#633806;border-color:#FAC775}
+.who-a.on{background:#C87B0A;color:#fff;border-color:#C87B0A;box-shadow:0 2px 8px rgba(200,123,10,0.35)}
+.who-c{background:#EEF7E3;color:#27500A;border-color:#C0DD97}
+.who-c.on{background:#3A7A10;color:#fff;border-color:#3A7A10;box-shadow:0 2px 8px rgba(58,122,16,0.35)}
+.who-f{background:#F0EFFD;color:#3C3489;border-color:#CECBF6}
+.who-f.on{background:#4B3FD4;color:#fff;border-color:#4B3FD4;box-shadow:0 2px 8px rgba(75,63,212,0.35)}
+.month-block{margin-bottom:2rem}
+.month-title{font-size:16px;font-weight:500;color:#1a1a1a;margin:18px 0 8px;padding-bottom:6px;border-bottom:0.5px solid #ddd}
+table{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff;border-radius:8px;overflow:hidden;border:0.5px solid #e0e0da}
+col.c-date{width:58px}col.c-dow{width:52px}col.c-ev{width:auto}col.c-plan{width:130px}
+th{font-size:12px;color:#888;font-weight:400;padding:6px 10px;border-bottom:0.5px solid #e0e0da;text-align:left;background:#fafaf8}
+td{padding:9px 10px;border-bottom:0.5px solid #f0f0ec;vertical-align:top;font-size:13px;word-break:break-word;line-height:1.55}
+tr:last-child td{border-bottom:none}
+.date-cell{font-weight:500;color:#1a1a1a;white-space:nowrap}
+.dow-cell{color:#888;white-space:nowrap}
+.sun .date-cell,.sun .dow-cell{color:#d94f4f}
+.sat .date-cell,.sat .dow-cell{color:#2a6db5}
+.muted{color:#aaa}
+.tag{display:inline-block;font-size:11px;font-weight:500;padding:1px 7px;border-radius:20px;white-space:nowrap}
+.td{background:#B5D4F4;color:#0C447C}.ta{background:#FAC775;color:#633806}.tc{background:#C0DD97;color:#27500A}.tf{background:#EEEDFE;color:#3C3489}
+.ev-line{margin-bottom:6px;line-height:1.5}.ev-line:last-child{margin-bottom:0}
+.ev-title{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.ev-name{color:#1a1a1a;font-size:13px}
+.ev-meta{font-size:11px;color:#888;margin-top:2px;padding-left:2px;line-height:1.6}
+.plan-cell{font-size:12px;color:#888;vertical-align:top;line-height:1.6}
+.cal-grid{margin-bottom:2rem}
+.cal-grid-title{font-size:16px;font-weight:500;color:#1a1a1a;margin:18px 0 8px;padding-bottom:6px;border-bottom:0.5px solid #ddd}
+.cal-table{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff;border-radius:8px;overflow:hidden;border:0.5px solid #e0e0da}
+.cal-table th{font-size:12px;font-weight:500;text-align:center;padding:6px 2px;border-bottom:2px solid #e0e0da;background:#fafaf8}
+.cal-table th.sun-h{color:#d94f4f}.cal-table th.sat-h{color:#2a6db5}
+.cal-cell{vertical-align:top;padding:5px 4px;border:0.5px solid #f0f0ec;min-height:70px;background:#fff}
+.cal-cell.empty{background:#f8f8f6;opacity:0.5}
+.cal-cell.past{background:#f8f8f6;opacity:0.4}
+.cal-date-wrap{margin-bottom:4px}
+.cal-dn{display:inline-block;font-size:13px;font-weight:500;width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;color:#1a1a1a}
+.cal-dn.sun{color:#d94f4f}.cal-dn.sat{color:#2a6db5}
+.cal-dn.today{background:#E24B4A;color:#fff;font-weight:700;box-shadow:0 0 0 3px rgba(228,75,74,0.25),0 2px 8px rgba(228,75,74,0.4)}
+.cal-ev{font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.cal-ev-d{background:#B5D4F4;color:#0C447C}.cal-ev-a{background:#FAC775;color:#633806}
+.cal-ev-c{background:#C0DD97;color:#27500A}.cal-ev-f{background:#EEEDFE;color:#3C3489}
+@media(max-width:600px){col.c-plan{width:80px}col.c-date{width:48px}col.c-dow{width:44px}th,td{padding:7px 6px}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>2026 黃家行事曆</h1>
+<div class="view-toggle">
+  <button class="view-btn" onclick="setView('month',this)">📅 月曆</button>
+  <button class="view-btn on" onclick="setView('list',this)">📋 行事曆</button>
+</div>
+<div class="stats">
+  <div class="stat"><div class="stat-label">總天數</div><div class="stat-num" id="stotal">100</div></div>
+  <div class="stat"><div class="stat-label">有行程</div><div class="stat-num" id="shas">0</div></div>
+  <div class="stat"><div class="stat-label">無行程</div><div class="stat-num" id="snone">0</div></div>
+</div>
+<div class="filter-section" id="filter-section">
+  <div class="filter-row">
+    <button class="sched-btn on" onclick="setSched('all',this)">全部行程</button>
+    <button class="sched-btn" onclick="setSched('has',this)">有行程</button>
+    <button class="sched-btn" onclick="setSched('none',this)">無行程</button>
+  </div>
+  <div class="filter-row">
+    <button class="who-btn who-d" onclick="setWho('d',this)">丁哥</button>
+    <button class="who-btn who-a" onclick="setWho('a',this)">阿多</button>
+    <button class="who-btn who-c" onclick="setWho('c',this)">可可</button>
+    <button class="who-btn who-f" onclick="setWho('f',this)">全家</button>
+  </div>
+</div>
+<div id="cal"></div>
+</div>
+<script>
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const DOW=['日','一','二','三','四','五','六'];
+function pad(n){return String(n).padStart(2,'0')}
+function dk(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function tclass(w){return w==='d'?'td':w==='a'?'ta':w==='c'?'tc':'tf'}
+function tlabel(w){return w==='d'?'丁哥':w==='a'?'阿多':w==='c'?'可可':'全家'}
+function sortKey(t){if(!t)return 9999;const m=t.match(/(\d{1,2}):(\d{2})/);return m?parseInt(m[1])*100+parseInt(m[2]):9999;}
+
+const ORIG_START=new Date(2026,4,24);
+const calStart=TODAY>ORIG_START?new Date(TODAY):new Date(ORIG_START);
+const calEnd=addDays(calStart,99);
+
+const FIX={
+  '2026-05-24':[
+    {w:'d',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽',note:'vs 榮富國小'},
+    {w:'a',time:'12:00',loc:'華僑高中',ev:'小學生足球賽預賽',note:'vs 新市國小'},
+    {w:'a',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽',note:'vs 自強國小'},
+  ],
+  '2026-05-26':[{w:'d',time:'',loc:'',ev:'期末考'}],
+  '2026-05-30':[
+    {w:'d',time:'10:00',loc:'華僑高中',ev:'小學生足球賽預賽',note:'vs 崇德國小'},
+    {w:'d',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽',note:'vs A2'},
+    {w:'a',time:'12:00',loc:'華僑高中',ev:'小學生足球賽預賽',note:'vs 海山國小'},
+  ],
+  '2026-06-05':[{w:'d',time:'08:00',loc:'',ev:'蘆洲國中線上報到',calLabel:'線上報到'}],
+  '2026-06-12':[{w:'d',time:'',loc:'',ev:'國小畢業典禮',calLabel:'畢業典禮'}],
+  '2026-06-17':[{w:'a',time:'',loc:'',ev:'期末考'}],
+  '2026-06-18':[{w:'d',time:'09:00~10:30',loc:'',ev:'蘆洲國中新生入學測驗',calLabel:'新生測驗'}],
+  '2026-06-19':[{w:'d',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'},{w:'a',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'}],
+  '2026-06-20':[{w:'d',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'},{w:'a',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'}],
+  '2026-06-21':[{w:'d',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'},{w:'a',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'}],
+  '2026-06-27':[{w:'a',time:'',loc:'台中朝馬足球場',ev:'小學生足球賽決賽',calLabel:'足球賽決賽'}],
+  '2026-07-12':[{w:'d',time:'09:00~10:00',loc:'',ev:'蘆洲國中新生編班',calLabel:'新生編班'}],
+  '2026-08-24':[{w:'d',time:'08:00~12:00',loc:'',ev:'蘆洲國中始業輔導',calLabel:'始業輔導'}],
+  '2026-08-25':[{w:'d',time:'08:00~12:00',loc:'',ev:'蘆洲國中始業輔導',calLabel:'始業輔導'}],
+  '2026-08-31':[{w:'d',time:'07:10',loc:'',ev:'蘆洲國中開學日',note:'全天上課',calLabel:'開學日'}],
+};
+
+function practiceAMPM(w,loc){return {w,time:'09:00',type:'group',ev:'暑期練球（上午／下午）',calLabel:'暑期練球(上/下)',lines:[{loc,time:'09:00–11:00'},{loc,time:'14:00–17:00'}]};}
+function practicePM(w,loc){return {w,time:'14:00',type:'group',ev:'暑期練球（下午）',calLabel:'暑期練球(下)',lines:[{loc,time:'14:00–17:00'}]};}
+
+function getEvs(dt){
+  const k=dk(dt),y=dt.getFullYear(),m=dt.getMonth()+1,d=dt.getDate();
+  const ev=FIX[k]?[...FIX[k]]:[];
+  if(y===2026&&m===8&&d>=9&&d<=11) ev.push({w:'f',time:'',loc:'溪頭',ev:'家庭旅行',calLabel:'家庭旅行'});
+  if((y===2026&&m===6&&d>=28)||(y===2026&&m===7&&d<=5)) ev.push({w:'a',time:'',loc:'台中朝馬足球場',ev:'小學生足球賽決賽',calLabel:'足球賽決賽'});
+  if(y===2026&&m===7&&d===6) ev.push({w:'a',time:'',loc:'台中朝馬足球場',ev:'小學生足球賽決賽',calLabel:'足球賽決賽'});
+  if((y===2026&&m===7&&d===6)||(y===2026&&m===7&&d>=7&&d<=10)) ev.push(practiceAMPM('a','蘆洲國小'));
+  if(y===2026&&m===7&&d>=13&&d<=23) ev.push(practicePM('a','蘆洲國小'));
+  if(y===2026&&m===7&&d>=16&&d<=21) ev.push({w:'d',time:'',loc:'廣州番禺區',ev:'台港澳足球聯賽',calLabel:'台港澳聯賽'});
+  if(y===2026&&m===7&&d>=27&&d<=31) ev.push(practiceAMPM('a','蘆洲國小'));
+  if(y===2026&&m===8&&d>=3&&d<=21) ev.push(practiceAMPM('a','蘆洲國小'));
+  ev.sort((a,b)=>sortKey(a.time)-sortKey(b.time));
+  return ev;
+}
+
+const allDays=[];
+for(let i=0;i<100;i++){
+  const d=addDays(calStart,i);d.setHours(0,0,0,0);
+  allDays.push({d,evs:getEvs(d)});
+}
+
+const hasC=allDays.filter(r=>r.evs.length>0).length;
+document.getElementById('shas').textContent=hasC;
+document.getElementById('snone').textContent=allDays.length-hasC;
+document.getElementById('stotal').textContent=allDays.length;
+
+const MN_MAP={0:'1月',1:'2月',2:'3月',3:'4月',4:'5月',5:'6月',6:'7月',7:'8月',8:'9月',9:'10月',10:'11月',11:'12月'};
+function monthKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)}
+function monthLabel(d){return d.getFullYear()+'年 '+MN_MAP[d.getMonth()]}
+const months={};
+allDays.forEach(r=>{
+  const mk=monthKey(r.d);
+  if(!months[mk]){months[mk]={label:monthLabel(r.d),days:[]};}
+  months[mk].days.push(r);
+});
+
+function renderEv(e){
+  const tag=`<span class="tag ${tclass(e.w)}" style="font-size:11px;padding:1px 6px">${tlabel(e.w)}</span>`;
+  if(e.type==='group'){
+    const metaLines=e.lines.map(l=>`${l.loc}・${l.time}`).join('<br>');
+    return `<div class="ev-line" data-who="${e.w}"><div class="ev-title">${tag}<span class="ev-name">${e.ev}</span></div><div class="ev-meta">${metaLines}</div></div>`;
+  }
+  const meta=[e.loc,e.time].filter(x=>x).join('・');
+  const noteStr=e.note?`<br>${e.note}`:'';
+  return `<div class="ev-line" data-who="${e.w}"><div class="ev-title">${tag}<span class="ev-name">${e.ev}</span></div>${meta||noteStr?`<div class="ev-meta">${meta}${noteStr}</div>`:''}</div>`;
+}
+
+let activeSchedule='all',activeWho='',activeView='list';
+
+function setView(v,btn){
+  activeView=v;
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('filter-section').style.display=v==='list'?'flex':'none';
+  render();
+}
+function setSched(f,btn){
+  activeSchedule=f;activeWho='';
+  document.querySelectorAll('.sched-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');render();
+}
+function setWho(w,btn){
+  if(activeWho===w){
+    activeWho='';btn.classList.remove('on');
+    document.querySelector('.sched-btn').classList.add('on');
+  } else {
+    activeWho=w;activeSchedule='all';
+    document.querySelectorAll('.sched-btn').forEach(b=>b.classList.remove('on'));
+    document.querySelector('.sched-btn').classList.add('on');
+    document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+  render();
+}
+
+function render(){activeView==='list'?buildList():buildMonthCal();}
+
+function buildList(){
+  let html='';
+  for(const mk of Object.keys(months)){
+    const{label,days}=months[mk];
+    const julAug=mk.endsWith('-07')||mk.endsWith('-08');
+    let rows='';
+    for(const{d,evs}of days){
+      const dow=d.getDay();
+      const cls=dow===0?'sun':dow===6?'sat':'';
+      const hasEv=evs.length>0;
+      if(!julAug&&!hasEv) continue;
+      let fEvs=activeWho?evs.filter(e=>e.w===activeWho):evs;
+      if(activeWho&&fEvs.length===0) continue;
+      if(!activeWho){
+        if(activeSchedule==='has'&&!hasEv) continue;
+        if(activeSchedule==='none'&&hasEv) continue;
+      }
+      const evHtml=fEvs.length?fEvs.map(renderEv).join(''):'<span class="muted">—</span>';
+      const planArr=fEvs.map(e=>e.note||'').filter(Boolean);
+      const planHtml=planArr.join('<br>');
+      rows+=`<tr class="${cls}">
+        <td class="date-cell">${pad(d.getMonth()+1)}/${pad(d.getDate())}</td>
+        <td class="dow-cell">週${DOW[dow]}</td>
+        <td>${evHtml}</td>
+        <td class="plan-cell">${planHtml}</td>
+      </tr>`;
+    }
+    if(rows) html+=`<div class="month-block"><div class="month-title">${label}</div>
+      <table><colgroup><col class="c-date"><col class="c-dow"><col class="c-ev"><col class="c-plan"></colgroup>
+      <thead><tr><th>日期</th><th>星期</th><th>事件</th><th>計劃／備註</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+  }
+  document.getElementById('cal').innerHTML=html||'<div style="color:#aaa;padding:20px 0;font-size:14px">無符合行程</div>';
+}
+
+function buildMonthCal(){
+  let html='';
+  for(const mk of Object.keys(months)){
+    const{label,days}=months[mk];
+    const firstD=days[0].d;
+    const year=firstD.getFullYear(),month=firstD.getMonth();
+    html+=`<div class="cal-grid"><div class="cal-grid-title">${label}</div>
+    <table class="cal-table"><thead><tr>`;
+    ['日','一','二','三','四','五','六'].forEach((h,i)=>html+=`<th class="${i===0?'sun-h':i===6?'sat-h':''}">${h}</th>`);
+    html+=`</tr></thead><tbody>`;
+    const firstDay=new Date(year,month,1).getDay();
+    const daysInMonth=new Date(year,month+1,0).getDate();
+    let day=1;
+    for(let row=0;row<6;row++){
+      html+='<tr>';
+      for(let col=0;col<7;col++){
+        const cellIdx=row*7+col;
+        if(cellIdx<firstDay||day>daysInMonth){html+='<td class="cal-cell empty"></td>';}
+        else{
+          const thisDate=new Date(year,month,day);thisDate.setHours(0,0,0,0);
+          const inWindow=thisDate>=calStart&&thisDate<=calEnd;
+          const isPast=!inWindow&&thisDate<calStart;
+          const isToday=thisDate.getTime()===TODAY.getTime();
+          const dayData=days.find(r=>r.d.getDate()===day);
+          const evs=dayData?dayData.evs:[];
+          const dowCls=col===0?'sun':col===6?'sat':'';
+          html+=`<td class="cal-cell${isPast?' past':''}">`;
+          html+=`<div class="cal-date-wrap"><span class="cal-dn ${dowCls}${isToday?' today':''}">${day}</span></div>`;
+          evs.forEach(e=>{
+            const lbl=e.calLabel||e.ev;
+            html+=`<div class="cal-ev cal-ev-${e.w}" title="${tlabel(e.w)}：${e.ev}">${lbl}</div>`;
+          });
+          html+='</td>';
+          day++;
+        }
+      }
+      html+='</tr>';
+      if(day>daysInMonth) break;
+    }
+    html+=`</tbody></table></div>`;
+  }
+  document.getElementById('cal').innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>
