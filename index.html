@@ -114,7 +114,21 @@ border-color:#E24B4A!important
 .cal-ev-c{background:#C0DD97;color:#27500A}.cal-ev-f{background:#EEEDFE;color:#3C3489}
 .save-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;font-size:13px;padding:8px 20px;border-radius:20px;z-index:3000;opacity:0;transition:opacity .3s;pointer-events:none}
 .save-toast.show{opacity:1}
-@media(max-width:600px){col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{width:70px}}
+/* 連線狀態指示 */
+.sync-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:20px;font-weight:500;white-space:nowrap}
+.sync-cloud{background:#E6F4EA;color:#1a7340;border:1px solid #b7dfbf}
+.sync-local{background:#FEF3E2;color:#7a4e0a;border:1px solid #f5c97a}
+.sync-loading{background:#f0f0ee;color:#888;border:1px solid #ddd}
+.sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sync-cloud .sync-dot{background:#1a7340}
+.sync-local .sync-dot{background:#c87b0a}
+.sync-loading .sync-dot{background:#ccc}
+@media(max-width:600px){col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{width:70px}
+/* 手機行事曆字體加大 */
+.ev-name{font-size:14px!important}
+.ev-meta{font-size:12px!important}
+.ev-plan-pair{padding:10px 8px!important}
+}
 </style>
 </head>
 <body>
@@ -125,7 +139,10 @@ border-color:#E24B4A!important
     <button class="view-btn" onclick="setView('month',this)">📅 月曆</button>
     <button class="view-btn on" onclick="setView('list',this)">📋 行事曆</button>
   </div>
-  <button class="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <span class="sync-badge sync-loading" id="sync-badge"><span class="sync-dot"></span><span id="sync-text">連線中…</span></span>
+    <button class="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
+  </div>
 </div>
 <div class="stats">
   <div class="stat"><div class="stat-label">總天數</div><div class="stat-num" id="stotal">100</div></div>
@@ -264,12 +281,26 @@ async function loadStore(){
       })
     );
 
+    // 雲端成功 → 綠色 badge
+    setSyncBadge('cloud');
+
   }catch(e){
 
     console.error('cloud load error',e);
 
+    // 雲端失敗 → 橘色 badge
+    setSyncBadge('local');
+
   }
 
+}
+
+function setSyncBadge(mode){
+  const badge=document.getElementById('sync-badge');
+  const text=document.getElementById('sync-text');
+  if(!badge||!text) return;
+  badge.className='sync-badge '+(mode==='cloud'?'sync-cloud':mode==='local'?'sync-local':'sync-loading');
+  text.textContent=mode==='cloud'?'☁ 雲端同步':mode==='local'?'⚠ 本機資料':'連線中…';
 }
 
 
@@ -317,9 +348,12 @@ await fetch(
 
 );
 
+    setSyncBadge('cloud');
+
   }catch(e){
 
     console.error('cloud save error',e);
+    setSyncBadge('local');
 
   }
 
@@ -581,14 +615,24 @@ function buildMonthCal(){
 function todayStr(){return dk(TODAY);}
 
 function positionPopup(popup,triggerEl){
-  const vw=window.innerWidth,vh=window.innerHeight,pw=320;
-  if(!triggerEl){popup.style.top='50%';popup.style.left='50%';popup.style.transform='translate(-50%,-50%)';return;}
-  const r=triggerEl.getBoundingClientRect();
-  let top=r.bottom+8,left=r.left;
-  if(left+pw>vw-8) left=vw-pw-8;
-  if(left<8) left=8;
-  if(top+460>vh-8) top=Math.max(8,r.top-460-8);
-  popup.style.top=top+'px';popup.style.left=left+'px';popup.style.transform='none';
+  // 統一使用全螢幕半透明遮罩 + 視窗垂直置中捲動
+  // 避免手機上彈出視窗被截斷、按鈕點不到的問題
+
+  // 先把遮罩改為半透明黑底，讓使用者可以點擊關閉
+  const overlay=popup.previousElementSibling;
+  if(overlay&&overlay.classList.contains('modal-overlay')){
+    overlay.style.background='rgba(0,0,0,0.35)';
+  }
+
+  // popup 固定於畫面垂直置中，最多佔 90vh，內部可捲動
+  popup.style.position='fixed';
+  popup.style.top='50%';
+  popup.style.left='50%';
+  popup.style.transform='translate(-50%,-50%)';
+  popup.style.maxHeight='90vh';
+  popup.style.overflowY='auto';
+  popup.style.WebkitOverflowScrolling='touch';
+  popup.style.zIndex='1000';
 }
 
 function showModal(title,dateVal,ev,triggerEl){
