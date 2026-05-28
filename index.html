@@ -115,6 +115,94 @@ border-color:#E24B4A!important
 .save-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;font-size:13px;padding:8px 20px;border-radius:20px;z-index:3000;opacity:0;transition:opacity .3s;pointer-events:none}
 .save-toast.show{opacity:1}
 @media(max-width:600px){col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{width:70px}}
+/* ===== 同步狀態 ===== */
+
+.sync-status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  margin-right:10px;
+}
+
+.sync-status.cloud{
+  background:#e8f5e9;
+  color:#2e7d32;
+}
+
+.sync-status.local{
+  background:#fff3e0;
+  color:#ef6c00;
+}
+
+/* ===== 手機行程字體優化 ===== */
+
+@media (max-width:768px){
+
+  .event-title{
+    font-size:15px !important;
+    line-height:1.5;
+    font-weight:600;
+  }
+
+  .event-time,
+  .event-note{
+    font-size:13px !important;
+    line-height:1.4;
+  }
+
+  .calendar-row{
+    padding:10px 6px;
+  }
+
+  .event-chip{
+    font-size:12px;
+  }
+}
+
+/* ===== 彈窗定位修正 ===== */
+
+.modal{
+  position:fixed !important;
+  inset:0;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  overflow:auto;
+  padding:40px 16px;
+  z-index:9999;
+}
+
+.modal-content{
+  width:min(92vw,520px);
+  margin:auto;
+  max-height:90vh;
+  overflow:auto;
+  border-radius:18px;
+}
+
+/* 手機避免按鈕被擋 */
+
+@media (max-width:768px){
+
+  .modal-content{
+    margin-top:20px;
+    margin-bottom:40px;
+  }
+
+  .modal-footer{
+    position:sticky;
+    bottom:0;
+    background:#fff;
+    padding-top:12px;
+  }
+}
+
+
+  
 </style>
 </head>
 <body>
