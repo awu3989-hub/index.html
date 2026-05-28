@@ -592,7 +592,6 @@ function positionPopup(popup,triggerEl){
 }
 
 function showModal(title,dateVal,ev,triggerEl){
-  const whoOpts=['d','a','c','f'].map(w=>`<option value="${w}"${ev&&ev.w===w?' selected':''}>${tlabel(w)}</option>`).join('');
   const del=ev?`<button class="btn-del" onclick="deleteEv()">刪除</button>`:'';
   document.getElementById('modal-container').innerHTML=`
   <div class="modal-overlay" onclick="closeModal()"></div>
@@ -603,7 +602,6 @@ function showModal(title,dateVal,ev,triggerEl){
       <input 
         type="date" 
         id="m-date" 
-        value="${dateVal}" 
         min="${dk(calStart)}"
         max="${dk(calEnd)}"
         ${ev?'disabled':''}
@@ -613,17 +611,35 @@ function showModal(title,dateVal,ev,triggerEl){
         :'<div class="hint">只能新增未來 100 天內的行程</div>'
       }
     </div>
-    <div class="mf"><label>人物</label><select id="m-who">${whoOpts}</select></div>
-    <div class="mf"><label>事件</label><input type="text" id="m-ev" value="${ev?ev.ev:''}" placeholder="事件名稱"></div>
+    <div class="mf"><label>人物</label><select id="m-who">
+      <option value="d">丁哥</option>
+      <option value="a">阿多</option>
+      <option value="c">可可</option>
+      <option value="f">全家</option>
+    </select></div>
+    <div class="mf"><label>事件</label><input type="text" id="m-ev" placeholder="事件名稱"></div>
     <div class="mf-row">
-      <div class="mf"><label>時間</label><input type="text" id="m-time" value="${ev?ev.time||'':''}" placeholder="14:00"></div>
-      <div class="mf"><label>地點</label><input type="text" id="m-loc" value="${ev?ev.loc||'':''}" placeholder="地點"></div>
+      <div class="mf"><label>時間</label><input type="text" id="m-time" placeholder="14:00"></div>
+      <div class="mf"><label>地點</label><input type="text" id="m-loc" placeholder="地點"></div>
     </div>
-    <div class="mf"><label>對象</label><input type="text" id="m-target" value="${ev?ev.target||'':''}" placeholder="例如：vs 榮富國小（選填）"></div>
-    <div class="mf"><label>計劃／備註</label><input type="text" id="m-note" value="${ev?ev.note||'':''}" placeholder="備註（選填）"></div>
-    <div class="mf"><label>月曆簡記</label><input type="text" id="m-cal" value="${ev?ev.calLabel||'':''}" placeholder="月曆顯示的簡短文字"><div class="hint">留空則自動使用事件名稱</div></div>
+    <div class="mf"><label>對象</label><input type="text" id="m-target" placeholder="例如：vs 榮富國小（選填）"></div>
+    <div class="mf"><label>計劃／備註</label><input type="text" id="m-note" placeholder="備註（選填）"></div>
+    <div class="mf"><label>月曆簡記</label><input type="text" id="m-cal" placeholder="月曆顯示的簡短文字"><div class="hint">留空則自動使用事件名稱</div></div>
     <div class="modal-actions">${del}<button onclick="closeModal()">取消</button><button class="btn-save" onclick="saveEv()">儲存</button></div>
   </div>`;
+
+  // 用 JS 直接賦值，安全處理所有特殊字元
+  document.getElementById('m-date').value = dateVal || '';
+  if(ev){
+    document.getElementById('m-who').value = ev.w || 'd';
+    document.getElementById('m-ev').value = ev.ev || '';
+    document.getElementById('m-time').value = ev.time || '';
+    document.getElementById('m-loc').value = ev.loc || '';
+    document.getElementById('m-target').value = ev.target || '';
+    document.getElementById('m-note').value = ev.note || '';
+    document.getElementById('m-cal').value = ev.calLabel || '';
+  }
+
   positionPopup(document.getElementById('modal-popup'),triggerEl);
 }
 
@@ -670,12 +686,15 @@ function openEdit(evt,dateKey,evId){
     }
   }
 
+  // showModal 會渲染空白欄位，再由 JS 安全賦值
   showModal('編輯行程',dateKey,ev,evt.currentTarget);
 }
 function closeModal(){document.getElementById('modal-container').innerHTML='';}
 
 function saveEv(){
-  const dateVal=document.getElementById('m-date').value;
+  // 編輯模式日期欄位是 disabled，部分瀏覽器（Safari/iOS）回傳空字串
+  // 改用 _editDateKey 確保正確取得日期
+  const dateVal=_editEvId ? _editDateKey : document.getElementById('m-date').value;
   const selectedDate=new Date(dateVal);
   selectedDate.setHours(0,0,0,0);
 
