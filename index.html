@@ -276,44 +276,44 @@ async function loadStore(){
 // ===== 儲存 =====
 
 async function saveStore() {
+
   try {
+
     setCloudStatus("saving");
 
     const res = await fetch(API_URL, {
+
       method: "POST",
+
       headers: {
         "Content-Type": "application/json"
       },
+
       body: JSON.stringify({
         action: "save",
         data: store
       })
+
     });
 
     const json = await res.json();
 
-    if (json.ok) {
+    if(json.success){
+
       setCloudStatus("cloud");
+
     } else {
+
+      console.error(json);
       setCloudStatus("local");
-      console.error("cloud save failed", json);
     }
 
-  } catch (err) {
-    console.error("cloud save error", err);
+  } catch(err){
+
+    console.error(err);
     setCloudStatus("local");
   }
-}{
-
-  const data = {
-
-    extraEvs,
-    overrideEvs,
-    deletedIds:[...deletedIds],
-    counter:evIdCounter
-
-  };
-
+}
 
   // localStorage 備份
 
