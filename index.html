@@ -166,21 +166,87 @@ const ORIG_START=new Date(2026,4,24);
 const calStart=TODAY>ORIG_START?new Date(TODAY):new Date(ORIG_START);
 const calEnd=addDays(calStart,99);
 
-const STORE_KEY='huang_cal_v2';
-let overrideEvs={},extraEvs={},deletedIds=new Set(),evIdCounter=9000;
+// ===== Google Sheet API =====
 
-function loadStore(){
+const API_URL =
+'https://script.google.com/macros/s/AKfycbwf7nC4LGzQlqJFFPL27uvG2Fjc9ChWHOlCRlHY-QWhcGijTtcfOMwJiSDJtt47pSzC/exec';
+
+
+// ===== 雲端資料 =====
+
+let overrideEvs={},
+    extraEvs={},
+    deletedIds=new Set(),
+    evIdCounter=9000;
+
+
+// ===== 讀取雲端 =====
+
+async function {
+
   try{
-    const raw=localStorage.getItem(STORE_KEY);
-    if(raw){const s=JSON.parse(raw);extraEvs=s.extraEvs||{};overrideEvs=s.overrideEvs||{};deletedIds=new Set(s.deletedIds||[]);evIdCounter=s.counter||9000;}
-  }catch(e){}
+
+    const res =
+      await fetch(API_URL);
+
+    const s =
+      await res.json();
+
+    extraEvs =
+      s.extraEvs || {};
+
+    overrideEvs =
+      s.overrideEvs || {};
+
+    deletedIds =
+      new Set(s.deletedIds || []);
+
+    evIdCounter =
+      s.counter || 9000;
+
+  }catch(e){
+
+    console.error('loadStore error',e);
+
+  }
+
 }
-function saveStore(){
-  try{localStorage.setItem(STORE_KEY,JSON.stringify({extraEvs,overrideEvs,deletedIds:[...deletedIds],counter:evIdCounter}));}catch(e){}
+
+
+// ===== 儲存雲端 =====
+
+async function saveStore(){
+
+  try{
+
+    await fetch(API_URL,{
+
+      method:'POST',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:JSON.stringify({
+
+        extraEvs,
+        overrideEvs,
+        deletedIds:[...deletedIds],
+        counter:evIdCounter
+
+      })
+
+    });
+
+  }catch(e){
+
+    console.error('saveStore error',e);
+
+  }
+
   showToast();
+
 }
-function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
-loadStore();
 
 const BASE_FIX={
   '2026-05-24':[{w:'d',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽'},{w:'a',time:'12:00',loc:'華僑高中',ev:'小學生足球賽預賽'},{w:'a',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽'}],
@@ -569,7 +635,13 @@ function deleteEv(){
   render();
 }
 
-render();
+(async()=>{
+
+  await loadStore();
+
+  render();
+
+})();
 </script>
 </body>
 </html>
