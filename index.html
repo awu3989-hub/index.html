@@ -169,7 +169,7 @@ const calEnd=addDays(calStart,99);
 // ===== Google Sheet API =====
 
 const API_URL =
-'https://script.google.com/macros/s/AKfycbzDrAnQBJACymN0GAcreJQO33SlZrQZ8T_NEHNfdkzIdIUe9jx133vhsENZB8tE7MFl/exec';
+'https://script.google.com/macros/s/AKfycbxOuBY64BC-0ZNTHndvywPukS0mkM6cdoeKwmByL3b0Fo9VSE-3lcuhC1uRaVK-9cyF/exec';
 
 
 // ===== 資料 =====
@@ -223,8 +223,9 @@ async function loadStore(){
 
     // 再讀 Google Sheet 雲端
 
-    const res =
-      await fetch(API_URL);
+    const res = await fetch(
+  API_URL + '?action=load'
+);
 
     const cloud =
       await res.json();
@@ -306,17 +307,15 @@ async function saveStore(){
 
   try{
 
-    await fetch(API_URL,{
+await fetch(
 
-      method:'POST',
+  API_URL
+  + '?action=save&data='
+  + encodeURIComponent(
+      JSON.stringify(data)
+    )
 
-      headers:{
-        'Content-Type':'application/json'
-      },
-
-      body:JSON.stringify(data)
-
-    });
+);
 
   }catch(e){
 
