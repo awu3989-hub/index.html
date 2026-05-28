@@ -167,13 +167,9 @@ const calStart=TODAY>ORIG_START?new Date(TODAY):new Date(ORIG_START);
 const calEnd=addDays(calStart,99);
 
 // ===== Google Sheet API =====
-
-const API_URL =
-'https://script.google.com/macros/s/AKfycbxOuBY64BC-0ZNTHndvywPukS0mkM6cdoeKwmByL3b0Fo9VSE-3lcuhC1uRaVK-9cyF/exec';
-
+const API_URL = 'https://script.google.com/macros/s/AKfycbxOuBY64BC-0ZNTHndvywPukS0mkM6cdoeKwmByL3b0Fo9VSE-3lcuhC1uRaVK-9cyF/exec';
 
 // ===== 資料 =====
-
 const STORE_KEY='huang_cal_v2';
 
 let overrideEvs={},
@@ -181,180 +177,97 @@ let overrideEvs={},
     deletedIds=new Set(),
     evIdCounter=9000;
 
-
 // ===== 載入 =====
-
 async function loadStore(){
-
   try{
-
     // 先讀 localStorage（避免首次空白）
-
-    const raw =
-      localStorage.getItem(STORE_KEY);
-
+    const raw = localStorage.getItem(STORE_KEY);
     if(raw){
-
-      const s =
-        JSON.parse(raw);
-
-      extraEvs =
-        s.extraEvs || {};
-
-      overrideEvs =
-        s.overrideEvs || {};
-
-      deletedIds =
-        new Set(s.deletedIds || []);
-
-      evIdCounter =
-        s.counter || 9000;
-
+      const s = JSON.parse(raw);
+      extraEvs = s.extraEvs || {};
+      overrideEvs = s.overrideEvs || {};
+      deletedIds = new Set(s.deletedIds || []);
+      evIdCounter = s.counter || 9000;
     }
-
   }catch(e){
-
     console.error('local load error',e);
-
   }
 
-
   try{
-
     // 再讀 Google Sheet 雲端
-
-    const res = await fetch(
-  API_URL + '?action=load'
-);
-
-    const cloud =
-      await res.json();
-
+    const res = await fetch(API_URL + '?action=load');
+    const cloud = await res.json();
     if(cloud){
-
-      extraEvs =
-        cloud.extraEvs || extraEvs;
-
-      overrideEvs =
-        cloud.overrideEvs || overrideEvs;
-
-      deletedIds =
-        new Set(
-          cloud.deletedIds ||
-          [...deletedIds]
-        );
-
-      evIdCounter =
-        cloud.counter || evIdCounter;
-
+      extraEvs = cloud.extraEvs || extraEvs;
+      overrideEvs = cloud.overrideEvs || overrideEvs;
+      deletedIds = new Set(cloud.deletedIds || [...deletedIds]);
+      evIdCounter = cloud.counter || evIdCounter;
     }
 
-
     // 同步回 localStorage
-
     localStorage.setItem(
       STORE_KEY,
       JSON.stringify({
-
         extraEvs,
         overrideEvs,
         deletedIds:[...deletedIds],
         counter:evIdCounter
-
       })
     );
-
   }catch(e){
-
     console.error('cloud load error',e);
-
   }
-
 }
 
-
-// ===== 儲存 =====
-
+// ===== 儲存 (已改為優化版 POST 傳遞，防止網址過長出錯) =====
 async function saveStore(){
-
   const data = {
-
     extraEvs,
     overrideEvs,
     deletedIds:[...deletedIds],
     counter:evIdCounter
-
   };
 
-
-  // localStorage 備份
-
+  // localStorage 本地備份
   try{
-
-    localStorage.setItem(
-      STORE_KEY,
-      JSON.stringify(data)
-    );
-
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
   }catch(e){
-
     console.error('local save error',e);
-
   }
 
-
-  // Google Sheet 同步
-
+  // Google Sheet 雲端同步 (使用 POST 方法)
   try{
+    const payload = {
+      action: 'save',
+      data: JSON.stringify(data)
+    };
 
-await fetch(
-
-  API_URL
-  + '?action=save&data='
-  + encodeURIComponent(
-      JSON.stringify(data)
-    )
-
-);
-
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors', // 確保跨網域請求順利送出
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
   }catch(e){
-
     console.error('cloud save error',e);
-
   }
-
   showToast();
-
 }
-
 
 // ===== 提示 =====
-
 function showToast(){
-
-  const t =
-    document.getElementById('toast');
-
+  const t = document.getElementById('toast');
   if(!t) return;
-
   t.classList.add('show');
-
-  setTimeout(
-    ()=>t.classList.remove('show'),
-    1800
-  );
-
+  setTimeout(()=>t.classList.remove('show'), 1800);
 }
 
-
 // ===== 初始化 =====
-
 (async()=>{
-
   await loadStore();
-
   render();
-
 })();
 
 const BASE_FIX={
@@ -383,7 +296,7 @@ function makeStableId(parts){
   return parts.join('_').replace(/\s+/g,'');
 }
 
-function practiceAMPM(w,loc,dateKey){
+function practiceAMPM('w,loc,dateKey'){
   return {
     id:makeStableId(['practiceAMPM',w,loc,dateKey]),
     w,
@@ -638,14 +551,8 @@ function openEdit(evt,dateKey,evId){
   _editDateKey=dateKey;
   _editEvId=String(evId);
 
-  // 不可在這裡 rebuildEvById()
-  // 因為部分動態行程（例如 07/21 暑期練球）
-  // 每次重建都會重新產生 id，導致抓不到原本事件
-  // render() 時已經建立好 evById，直接使用即可
-
   let ev=evById[_editEvId]||null;
 
-  // 確保所有欄位都有正確帶入
   if(ev){
     ev={
       id:String(ev.id||''),
@@ -660,7 +567,6 @@ function openEdit(evt,dateKey,evId){
       lines:ev.lines||[]
     };
 
-    // group 類型行程，自動整理時間與地點文字
     if(ev.type==='group' && Array.isArray(ev.lines) && ev.lines.length){
       const timeText=ev.lines.map(l=>l.time||'').filter(Boolean).join(' / ');
       const locText=ev.lines.map(l=>l.loc||'').filter(Boolean).join(' / ');
@@ -679,7 +585,6 @@ function saveEv(){
   const selectedDate=new Date(dateVal);
   selectedDate.setHours(0,0,0,0);
 
-  // 限制只能新增 / 編輯 100 天內日期
   if(selectedDate<calStart || selectedDate>calEnd){
     alert('只能建立 100 天內的行程');
     return;
