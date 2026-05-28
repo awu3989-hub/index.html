@@ -1,647 +1,427 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026 黃家行事曆</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>100天家庭行事曆</title>
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Helvetica Neue',sans-serif;background:#f5f5f3;color:#1a1a1a;padding:24px 16px;min-height:100vh}
-.container{max-width:860px;margin:0 auto}
-h1{font-size:20px;font-weight:500;margin-bottom:20px;color:#1a1a1a}
-.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
-.view-toggle{display:flex;gap:8px}
-.view-btn{font-size:14px;font-weight:500;padding:8px 18px;border-radius:12px;border:2px solid #ccc;background:#f0f0ee;color:#888;cursor:pointer;transition:all .2s}
-.view-btn.on{border-color:#185FA5;background:#185FA5;color:#fff;box-shadow:0 3px 10px rgba(24,95,165,0.25)}
-.global-add-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:8px 18px;border-radius:12px;border:2px solid #185FA5;background:#185FA5;color:#fff;cursor:pointer;white-space:nowrap}
-.global-add-btn:hover{background:#0f4a8c}
-.stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.stat{background:#fff;border-radius:8px;padding:10px 20px;text-align:center;min-width:80px;border:0.5px solid #e0e0da}
-.stat-label{font-size:12px;color:#888;margin-bottom:4px}
-.stat-num{font-size:26px;font-weight:500;color:#1a1a1a}
-.filter-section{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
-.filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.sched-btn{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid #888;background:transparent;color:#555;cursor:pointer;transition:all .18s;font-weight:500}
-.sched-btn.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
-.who-btn{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid transparent;cursor:pointer;transition:all .18s;font-weight:500}
-.who-d{background:#EAF3FC;color:#0C447C;border-color:#B5D4F4}.who-d.on{background:#185FA5;color:#fff;border-color:#185FA5;box-shadow:0 2px 8px rgba(24,95,165,0.35)}
-.who-a{background:#FEF3E2;color:#633806;border-color:#FAC775}.who-a.on{background:#C87B0A;color:#fff;border-color:#C87B0A;box-shadow:0 2px 8px rgba(200,123,10,0.35)}
-.who-c{background:#EEF7E3;color:#27500A;border-color:#C0DD97}.who-c.on{background:#3A7A10;color:#fff;border-color:#3A7A10;box-shadow:0 2px 8px rgba(58,122,16,0.35)}
-.who-f{background:#F0EFFD;color:#3C3489;border-color:#CECBF6}.who-f.on{background:#4B3FD4;color:#fff;border-color:#4B3FD4;box-shadow:0 2px 8px rgba(75,63,212,0.35)}
-.month-block{margin-bottom:2rem}
-.month-title{font-size:16px;font-weight:500;color:#1a1a1a;margin:18px 0 8px;padding-bottom:6px;border-bottom:0.5px solid #ddd}
-table.list-table{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff;border-radius:8px;overflow:hidden;border:0.5px solid #e0e0da}
-col.c-date{width:58px}col.c-dow{width:52px}col.c-ev{width:auto}col.c-plan{width:110px}
-th{font-size:12px;color:#888;font-weight:400;padding:6px 10px;border-bottom:0.5px solid #e0e0da;text-align:left;background:#fafaf8}
-td{padding:0;border-bottom:0.5px solid #f0f0ec;vertical-align:top;font-size:13px}
-tr:last-child td{border-bottom:none}
-.date-td{padding:9px 10px;font-weight:500;color:#1a1a1a;white-space:nowrap;vertical-align:top}
-.dow-td{padding:9px 10px;color:#888;white-space:nowrap;vertical-align:top}
-.sun .date-td,.sun .dow-td{color:#d94f4f}.sat .date-td,.sat .dow-td{color:#2a6db5}
-.muted{color:#aaa}
-.tag{display:inline-block;font-size:11px;font-weight:500;padding:1px 7px;border-radius:20px;white-space:nowrap}
-.td{background:#B5D4F4;color:#0C447C}.ta{background:#FAC775;color:#633806}.tc{background:#C0DD97;color:#27500A}.tf{background:#EEEDFE;color:#3C3489}
-.ev-plan-pair{display:flex;align-items:flex-start;padding:9px 10px;border-bottom:0.5px solid #f0f0ec;gap:0}
-.ev-plan-pair:last-child{border-bottom:none}
-.ev-part{flex:1;min-width:0}
-.plan-part{width:110px;flex-shrink:0;font-size:12px;color:#888;line-height:1.55;padding-left:8px;padding-top:2px;word-break:break-word}
-.ev-title{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
-.ev-name{color:#1a1a1a;font-size:13px}
-.ev-meta{font-size:11px;color:#888;margin-top:2px;line-height:1.6}
-.edit-btn{display:none}
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;z-index:999;background:transparent}
-.modal-popup{position:fixed;z-index:1000;background:#fff;border-radius:14px;padding:18px;width:320px;max-width:94vw;border:0.5px solid #e0e0da;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
-.modal-popup h3{font-size:15px;font-weight:600;margin-bottom:13px;color:#1a1a1a}
-.mf{margin-bottom:9px}
-.mf label{font-size:12px;color:#888;display:block;margin-bottom:2px}
-.mf input,.mf select{width:100%;font-size:13px;padding:6px 8px;border-radius:7px;border:1px solid #ccc;background:#fff;color:#1a1a1a;outline:none}
-.mf input:focus,.mf select:focus{border-color:#185FA5;box-shadow:0 0 0 2px rgba(24,95,165,0.12)}
-.mf .hint{font-size:11px;color:#aaa;margin-top:2px}
-.mf-row{display:flex;gap:8px;margin-bottom:9px}
-.mf-row .mf{flex:1;margin-bottom:0}
-.modal-actions{
-display:flex;
-gap:10px;
-justify-content:flex-end;
-align-items:center;
-margin-top:18px;
-padding-top:14px;
-border-top:1px solid #eee;
-flex-wrap:nowrap
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
-.modal-actions button{
-flex:1;
-height:42px;
-font-size:14px;
-font-weight:600;
-border-radius:10px;
-border:1px solid #d8d8d8;
-cursor:pointer;
-background:#f7f7f5;
-color:#333;
-transition:all .18s;
-box-shadow:0 1px 2px rgba(0,0,0,.04)
+
+body{
+  font-family:"Noto Sans TC",sans-serif;
+  background:#f5f7fb;
+  color:#222;
 }
-.modal-actions button:hover{
-transform:translateY(-1px)
+
+header{
+  background:#4f46e5;
+  color:white;
+  padding:18px;
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
 }
-.btn-save{
-background:#185FA5!important;
-color:#fff!important;
-border-color:#185FA5!important
+
+.container{
+  max-width:1200px;
+  margin:20px auto;
+  padding:16px;
 }
-.btn-del{
-background:#E24B4A!important;
-color:#fff!important;
-border-color:#E24B4A!important
+
+.toolbar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
 }
-/* CAL */
-.cal-grid{margin-bottom:2rem}
-.cal-grid-title{font-size:16px;font-weight:500;color:#1a1a1a;margin:18px 0 8px;padding-bottom:6px;border-bottom:0.5px solid #ddd}
-.cal-table{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff;border-radius:8px;overflow:hidden;border:0.5px solid #e0e0da}
-.cal-table th{font-size:11px;font-weight:500;text-align:center;padding:5px 1px;border-bottom:2px solid #e0e0da;background:#fafaf8}
-.cal-table th.sun-h{color:#d94f4f}.cal-table th.sat-h{color:#2a6db5}
-.cal-cell{vertical-align:top;padding:3px 2px;border:0.5px solid #f0f0ec;min-height:62px;background:#fff}
-.cal-cell.empty{background:#f8f8f6;opacity:0.5}
-.cal-cell.past{background:#f8f8f6;opacity:0.4}
-.cal-date-wrap{margin-bottom:2px}
-.cal-dn{display:inline-block;font-size:12px;font-weight:500;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;color:#1a1a1a}
-.cal-dn.sun{color:#d94f4f}.cal-dn.sat{color:#2a6db5}
-.cal-dn.today{background:#E24B4A;color:#fff;box-shadow:0 0 0 2px rgba(228,75,74,0.22),0 1px 5px rgba(228,75,74,0.4)}
-.cal-ev{font-size:9px;padding:1px 3px;border-radius:3px;margin-bottom:1px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
-.cal-ev-d{background:#B5D4F4;color:#0C447C}.cal-ev-a{background:#FAC775;color:#633806}
-.cal-ev-c{background:#C0DD97;color:#27500A}.cal-ev-f{background:#EEEDFE;color:#3C3489}
-.save-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;font-size:13px;padding:8px 20px;border-radius:20px;z-index:3000;opacity:0;transition:opacity .3s;pointer-events:none}
-.save-toast.show{opacity:1}
-@media(max-width:600px){col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{width:70px}}
+
+button{
+  border:none;
+  background:#4f46e5;
+  color:white;
+  padding:10px 16px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+button:hover{
+  opacity:.9;
+}
+
+.card{
+  background:white;
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+  margin-bottom:18px;
+}
+
+.calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:10px;
+}
+
+.day{
+  background:#fff;
+  border-radius:14px;
+  min-height:140px;
+  padding:10px;
+  border:1px solid #e5e7eb;
+}
+
+.day-number{
+  font-weight:bold;
+  margin-bottom:8px;
+  color:#4f46e5;
+}
+
+.event{
+  background:#eef2ff;
+  border-left:4px solid #4f46e5;
+  padding:6px;
+  border-radius:8px;
+  margin-bottom:6px;
+  font-size:12px;
+}
+
+.event-title{
+  font-weight:bold;
+}
+
+.event-time{
+  color:#666;
+  margin-top:2px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:12px;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:10px;
+}
+
+textarea{
+  resize:vertical;
+}
+
+.loading{
+  text-align:center;
+  padding:30px;
+  color:#666;
+}
+
+.success{
+  color:green;
+  margin-top:10px;
+}
+
+.error{
+  color:red;
+  margin-top:10px;
+}
+
+@media(max-width:768px){
+  .calendar-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
 </style>
 </head>
+
 <body>
+
+<header>
+100天家庭行事曆
+</header>
+
 <div class="container">
-<h1>2026 黃家行事曆</h1>
-<div class="top-bar">
-  <div class="view-toggle">
-    <button class="view-btn" onclick="setView('month',this)">📅 月曆</button>
-    <button class="view-btn on" onclick="setView('list',this)">📋 行事曆</button>
+
+  <div class="toolbar">
+    <button onclick="loadData()">重新整理</button>
+    <button onclick="toggleForm()">新增行程</button>
   </div>
-  <button class="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
-</div>
-<div class="stats">
-  <div class="stat"><div class="stat-label">總天數</div><div class="stat-num" id="stotal">100</div></div>
-  <div class="stat"><div class="stat-label">有行程</div><div class="stat-num" id="shas">0</div></div>
-  <div class="stat"><div class="stat-label">無行程</div><div class="stat-num" id="snone">0</div></div>
-</div>
-<div class="filter-section" id="filter-section">
-  <div class="filter-row">
-    <button class="sched-btn on" onclick="setSched('all',this)">全部行程</button>
-    <button class="sched-btn" onclick="setSched('has',this)">有行程</button>
-    <button class="sched-btn" onclick="setSched('none',this)">無行程</button>
+
+  <div class="card" id="formCard" style="display:none;">
+    <h2 style="margin-bottom:16px;">新增行程</h2>
+
+    <div class="form-grid">
+
+      <div>
+        <label>日期</label>
+        <input type="date" id="date">
+      </div>
+
+      <div>
+        <label>成員</label>
+        <input type="text" id="who" placeholder="例如：爸爸">
+      </div>
+
+      <div>
+        <label>類型</label>
+        <input type="text" id="type" placeholder="例如：工作">
+      </div>
+
+      <div>
+        <label>事件</label>
+        <input type="text" id="event" placeholder="例如：開會">
+      </div>
+
+      <div>
+        <label>時間</label>
+        <input type="text" id="time" placeholder="例如：14:00">
+      </div>
+
+      <div>
+        <label>地點</label>
+        <input type="text" id="location">
+      </div>
+
+      <div>
+        <label>對象</label>
+        <input type="text" id="opponent">
+      </div>
+
+    </div>
+
+    <div style="margin-top:12px;">
+      <label>備註</label>
+      <textarea id="note"></textarea>
+    </div>
+
+    <div style="margin-top:12px;">
+      <label>月份備註</label>
+      <textarea id="month_note"></textarea>
+    </div>
+
+    <div style="margin-top:16px;">
+      <button onclick="saveEvent()">儲存行程</button>
+    </div>
+
+    <div id="msg"></div>
+
   </div>
-  <div class="filter-row">
-    <button class="who-btn who-d" onclick="setWho('d',this)">丁哥</button>
-    <button class="who-btn who-a" onclick="setWho('a',this)">阿多</button>
-    <button class="who-btn who-c" onclick="setWho('c',this)">可可</button>
-    <button class="who-btn who-f" onclick="setWho('f',this)">全家</button>
+
+  <div class="card">
+    <div id="calendar" class="calendar-grid"></div>
   </div>
+
 </div>
-<div id="cal"></div>
-<div id="modal-container"></div>
-<div class="save-toast" id="toast">✓ 已儲存</div>
-</div>
+
 <script>
-const TODAY=new Date();TODAY.setHours(0,0,0,0);
-const DOW=['日','一','二','三','四','五','六'];
-function pad(n){return String(n).padStart(2,'0')}
-function dk(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
-function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
-function tclass(w){return w==='d'?'td':w==='a'?'ta':w==='c'?'tc':'tf'}
-function tlabel(w){return w==='d'?'丁哥':w==='a'?'阿多':w==='c'?'可可':'全家'}
-function sortKey(t){if(!t)return 9999;const m=t.match(/(\d{1,2}):(\d{2})/);return m?parseInt(m[1])*100+parseInt(m[2]):9999;}
 
-const ORIG_START=new Date(2026,4,24);
+const API_URL = "https://script.google.com/macros/s/AKfycbwf7nC4LGzQlqJFFPL27uvG2Fjc9ChWHOlCRlHY-QWhcGijTtcfOMwJiSDJtt47pSzC/exec";
 
-// 永遠維持「今天開始往後 100 天」
-// 若今天尚未到原始開始日，則仍從原始日開始
-const calStart=TODAY>ORIG_START?new Date(TODAY):new Date(ORIG_START);
-const calEnd=addDays(calStart,99);
+let calendarData = {
+  extraEvs:{},
+  overrideEvs:{},
+  deletedIds:[]
+};
 
-// ===== Google Sheet API =====
+function toggleForm(){
+  const form = document.getElementById("formCard");
 
-const API_URL =
-'https://script.google.com/macros/s/AKfycbwf7nC4LGzQlqJFFPL27uvG2Fjc9ChWHOlCRlHY-QWhcGijTtcfOMwJiSDJtt47pSzC/exec';
+  form.style.display =
+    form.style.display === "none"
+      ? "block"
+      : "none";
+}
 
+async function loadData(){
 
-// ===== 雲端資料 =====
-
-let overrideEvs={},
-    extraEvs={},
-    deletedIds=new Set(),
-    evIdCounter=9000;
-
-
-// ===== 讀取雲端 =====
-
-async function {
+  document.getElementById("calendar").innerHTML =
+    `<div class="loading">讀取中...</div>`;
 
   try{
 
-    const res =
-      await fetch(API_URL);
+    const res = await fetch(API_URL);
 
-    const s =
-      await res.json();
+    const text = await res.text();
 
-    extraEvs =
-      s.extraEvs || {};
+    calendarData = JSON.parse(text);
 
-    overrideEvs =
-      s.overrideEvs || {};
+    renderCalendar();
 
-    deletedIds =
-      new Set(s.deletedIds || []);
+  }catch(err){
 
-    evIdCounter =
-      s.counter || 9000;
+    document.getElementById("calendar").innerHTML =
+      `<div class="error">讀取失敗</div>`;
 
-  }catch(e){
-
-    console.error('loadStore error',e);
-
+    console.error(err);
   }
+}
+
+function renderCalendar(){
+
+  const calendar = document.getElementById("calendar");
+
+  calendar.innerHTML = "";
+
+  const events = calendarData.extraEvs || {};
+
+  const allDates = Object.keys(events).sort();
+
+  if(allDates.length === 0){
+
+    calendar.innerHTML =
+      `<div class="loading">目前沒有行程</div>`;
+
+    return;
+  }
+
+  allDates.forEach(date=>{
+
+    const dayDiv = document.createElement("div");
+
+    dayDiv.className = "day";
+
+    const evs = events[date];
+
+    let html = `
+      <div class="day-number">${date}</div>
+    `;
+
+    evs.forEach(ev=>{
+
+      html += `
+        <div class="event">
+          <div class="event-title">
+            ${ev.event || ""}
+          </div>
+
+          <div>
+            ${ev.who || ""}
+            ${ev.type ? "｜"+ev.type : ""}
+          </div>
+
+          <div class="event-time">
+            ${ev.time || ""}
+          </div>
+
+          <div>
+            ${ev.location || ""}
+          </div>
+
+          <div>
+            ${ev.note || ""}
+          </div>
+        </div>
+      `;
+    });
+
+    dayDiv.innerHTML = html;
+
+    calendar.appendChild(dayDiv);
+
+  });
 
 }
 
+async function saveEvent(){
 
-// ===== 儲存雲端 =====
+  const data = {
+    extraEvs:{...calendarData.extraEvs},
+    overrideEvs:calendarData.overrideEvs || {},
+    deletedIds:calendarData.deletedIds || []
+  };
 
-async function saveStore(){
+  const eventData = {
+    id: Date.now(),
+
+    date:
+      document.getElementById("date").value,
+
+    who:
+      document.getElementById("who").value,
+
+    type:
+      document.getElementById("type").value,
+
+    event:
+      document.getElementById("event").value,
+
+    time:
+      document.getElementById("time").value,
+
+    location:
+      document.getElementById("location").value,
+
+    opponent:
+      document.getElementById("opponent").value,
+
+    note:
+      document.getElementById("note").value,
+
+    month_note:
+      document.getElementById("month_note").value
+  };
+
+  if(!eventData.date){
+
+    showMsg("請輸入日期",true);
+
+    return;
+  }
+
+  if(!data.extraEvs[eventData.date]){
+
+    data.extraEvs[eventData.date] = [];
+  }
+
+  data.extraEvs[eventData.date].push(eventData);
 
   try{
 
     await fetch(API_URL,{
-
-      method:'POST',
-
-      headers:{
-        'Content-Type':'application/json'
-      },
-
-      body:JSON.stringify({
-
-        extraEvs,
-        overrideEvs,
-        deletedIds:[...deletedIds],
-        counter:evIdCounter
-
-      })
-
+      method:"POST",
+      body:JSON.stringify(data)
     });
 
-  }catch(e){
+    showMsg("儲存成功");
 
-    console.error('saveStore error',e);
+    calendarData = data;
 
+    renderCalendar();
+
+  }catch(err){
+
+    showMsg("儲存失敗",true);
+
+    console.error(err);
   }
-
-  showToast();
-
 }
 
-const BASE_FIX={
-  '2026-05-24':[{w:'d',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽'},{w:'a',time:'12:00',loc:'華僑高中',ev:'小學生足球賽預賽'},{w:'a',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽'}],
-  '2026-05-26':[{w:'d',time:'',loc:'',ev:'期末考'}],
-  '2026-05-30':[{w:'d',time:'10:00',loc:'華僑高中',ev:'小學生足球賽預賽'},{w:'d',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽'},{w:'a',time:'12:00',loc:'華僑高中',ev:'小學生足球賽預賽'}],
-  '2026-06-05':[{w:'d',time:'08:00',loc:'',ev:'蘆洲國中線上報到',calLabel:'線上報到'}],
-  '2026-06-07':[{w:'d',time:'',loc:'華僑高中',ev:'安聯小小世界盃預賽',calLabel:'世界盃預賽'}],
-  '2026-06-08':[{w:'d',time:'',loc:'華僑高中',ev:'安聯小小世界盃預賽',calLabel:'世界盃預賽'}],
-  '2026-06-12':[{w:'d',time:'',loc:'',ev:'國小畢業典禮',calLabel:'畢業典禮'}],
-  '2026-06-17':[{w:'a',time:'',loc:'',ev:'期末考'}],
-  '2026-06-18':[{w:'d',time:'09:00~10:30',loc:'',ev:'蘆洲國中新生入學測驗',calLabel:'新生測驗'}],
-  '2026-06-19':[{w:'d',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'},{w:'a',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'}],
-  '2026-06-20':[{w:'d',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'},{w:'a',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'}],
-  '2026-06-21':[{w:'d',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'},{w:'a',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'}],
-  '2026-06-27':[{w:'a',time:'',loc:'台中朝馬足球場',ev:'小學生足球賽決賽',calLabel:'足球賽決賽'}],
-  '2026-07-12':[{w:'d',time:'09:00~10:00',loc:'',ev:'蘆洲國中新生編班',calLabel:'新生編班'}],
-  '2026-08-24':[{w:'d',time:'08:00~12:00',loc:'',ev:'蘆洲國中始業輔導',calLabel:'始業輔導'}],
-  '2026-08-25':[{w:'d',time:'08:00~12:00',loc:'',ev:'蘆洲國中始業輔導',calLabel:'始業輔導'}],
-  '2026-08-31':[{w:'d',time:'07:10',loc:'',ev:'蘆洲國中開學日',note:'全天上課',calLabel:'開學日'}],
-};
-let baseIdCounter=1000;
-Object.values(BASE_FIX).forEach(arr=>arr.forEach(e=>e.id=String(baseIdCounter++)));
+function showMsg(text,isError=false){
 
-function makeStableId(parts){
-  return parts.join('_').replace(/\s+/g,'');
+  const msg = document.getElementById("msg");
+
+  msg.className =
+    isError ? "error" : "success";
+
+  msg.innerText = text;
+
+  setTimeout(()=>{
+    msg.innerText = "";
+  },3000);
 }
 
-function practiceAMPM(w,loc,dateKey){
-  return {
-    id:makeStableId(['practiceAMPM',w,loc,dateKey]),
-    w,
-    time:'09:00',
-    type:'group',
-    ev:'暑期練球（上午／下午）',
-    calLabel:'暑期練球(上/下)',
-    lines:[
-      {loc,time:'09:00–11:00'},
-      {loc,time:'14:00–17:00'}
-    ]
-  };
-}
+loadData();
 
-function practicePM(w,loc,dateKey){
-  return {
-    id:makeStableId(['practicePM',w,loc,dateKey]),
-    w,
-    time:'14:00',
-    type:'group',
-    ev:'暑期練球（下午）',
-    calLabel:'暑期練球(下)',
-    lines:[
-      {loc,time:'14:00–17:00'}
-    ]
-  };
-}
-
-function getBaseEvs(dt){
-  const k=dk(dt),y=dt.getFullYear(),m=dt.getMonth()+1,d=dt.getDate();
-  const ev=BASE_FIX[k]?BASE_FIX[k].map(e=>({...e})):[];
-  if(y===2026&&m===8&&d>=9&&d<=11) ev.push({
-    id:makeStableId(['familyTrip',k]),
-    w:'f',
-    time:'',
-    loc:'溪頭',
-    ev:'家庭旅行',
-    calLabel:'家庭旅行'
-  });
-
-  if((y===2026&&m===6&&d>=28)||(y===2026&&m===7&&d<=5)) ev.push({
-    id:makeStableId(['finalMatch',k]),
-    w:'a',
-    time:'',
-    loc:'台中朝馬足球場',
-    ev:'小學生足球賽決賽',
-    calLabel:'足球賽決賽'
-  });
-
-  if(y===2026&&m===7&&d===6) ev.push({
-    id:makeStableId(['finalMatch',k]),
-    w:'a',
-    time:'',
-    loc:'台中朝馬足球場',
-    ev:'小學生足球賽決賽',
-    calLabel:'足球賽決賽'
-  });
-
-  if((y===2026&&m===7&&d===6)||(y===2026&&m===7&&d>=7&&d<=10)) ev.push(practiceAMPM('a','蘆洲國小',k));
-
-  if(y===2026&&m===7&&d>=13&&d<=23) ev.push(practicePM('a','蘆洲國小',k));
-
-  if(y===2026&&m===7&&d>=16&&d<=21) ev.push({
-    id:makeStableId(['hkMacauLeague',k]),
-    w:'d',
-    time:'',
-    loc:'廣州番禺區',
-    ev:'台港澳足球聯賽',
-    calLabel:'台港澳聯賽'
-  });
-
-  if(y===2026&&m===7&&d>=27&&d<=31) ev.push(practiceAMPM('a','蘆洲國小',k));
-
-  if(y===2026&&m===8&&d>=3&&d<=21) ev.push(practiceAMPM('a','蘆洲國小',k));
-  return ev;
-}
-
-function getAllEvs(dt){
-  const k=dk(dt);
-  const base=getBaseEvs(dt).filter(e=>!deletedIds.has(String(e.id))).map(e=>overrideEvs[String(e.id)]?{...e,...overrideEvs[String(e.id)],id:String(e.id)}:e);
-  const extra=(extraEvs[k]||[]).filter(e=>!deletedIds.has(String(e.id)));
-  return [...base,...extra].sort((a,b)=>sortKey(a.time)-sortKey(b.time));
-}
-
-let evById={};
-function rebuildEvById(){evById={};allDays.forEach(({d})=>getAllEvs(d).forEach(e=>evById[String(e.id)]=e));}
-
-const allDays=[];
-for(let i=0;i<100;i++){const d=addDays(calStart,i);d.setHours(0,0,0,0);allDays.push({d});}
-const MN_MAP={0:'1月',1:'2月',2:'3月',3:'4月',4:'5月',5:'6月',6:'7月',7:'8月',8:'9月',9:'10月',10:'11月',11:'12月'};
-function monthKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)}
-function monthLabel(d){return d.getFullYear()+'年 '+MN_MAP[d.getMonth()]}
-const months={};
-allDays.forEach(r=>{const mk=monthKey(r.d);if(!months[mk]){months[mk]={label:monthLabel(r.d),days:[]};}months[mk].days.push(r);});
-
-function updateStats(){
-  const hasC=allDays.filter(r=>getAllEvs(r.d).length>0).length;
-  document.getElementById('shas').textContent=hasC;
-  document.getElementById('snone').textContent=allDays.length-hasC;
-  document.getElementById('stotal').textContent=allDays.length;
-}
-
-function renderEvLine(e,dateKey){
-  const tag=`
-    <button
-      class="tag ${tclass(e.w)}"
-      onclick="openEdit(event,'${dateKey}','${e.id}')"
-      title="編輯行程"
-      style="font-size:11px;padding:1px 8px;border:none;cursor:pointer"
-    >
-      ${tlabel(e.w)}
-    </button>
-  `;
-
-  if(e.type==='group'){
-    const meta=e.lines.map(l=>[l.time,l.loc].filter(x=>x).join('・')).join('<br>');
-    return `<div class="ev-title">${tag}<span class="ev-name">${e.ev}</span></div><div class="ev-meta">${meta}</div>`;
-  }
-
-  const metaParts=[e.time,e.loc,e.target].filter(x=>x);
-
-  return `<div class="ev-title">${tag}<span class="ev-name">${e.ev}</span></div>${metaParts.length?`<div class="ev-meta">${metaParts.join('・')}</div>`:''}`;
-}
-
-let activeSchedule='all',activeWho='',activeView='list';
-function setView(v,btn){activeView=v;document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('filter-section').style.display=v==='list'?'flex':'none';render();}
-function setSched(f,btn){activeSchedule=f;activeWho='';document.querySelectorAll('.sched-btn').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render();}
-function setWho(w,btn){
-  if(activeWho===w){activeWho='';btn.classList.remove('on');document.querySelector('.sched-btn').classList.add('on');}
-  else{activeWho=w;activeSchedule='all';document.querySelectorAll('.sched-btn').forEach(b=>b.classList.remove('on'));document.querySelector('.sched-btn').classList.add('on');document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
-  render();
-}
-function render(){rebuildEvById();activeView==='list'?buildList():buildMonthCal();}
-
-function buildList(){
-  let html='';
-  for(const mk of Object.keys(months)){
-    const{label,days}=months[mk];
-    const julAug=mk.endsWith('-07')||mk.endsWith('-08');
-    let rows='';
-    for(const{d}of days){
-      const evs=getAllEvs(d);
-      const dow=d.getDay();const cls=dow===0?'sun':dow===6?'sat':'';
-      const hasEv=evs.length>0;
-      if(!julAug&&!hasEv) continue;
-      let fEvs=activeWho?evs.filter(e=>e.w===activeWho):evs;
-      if(activeWho&&fEvs.length===0) continue;
-      if(!activeWho){if(activeSchedule==='has'&&!hasEv) continue;if(activeSchedule==='none'&&hasEv) continue;}
-      const dateKey=dk(d);
-      let pairsHtml='';
-      if(fEvs.length){fEvs.forEach(e=>{pairsHtml+=`<div class="ev-plan-pair"><div class="ev-part">${renderEvLine(e,dateKey)}</div><div class="plan-part">${e.note||''}</div></div>`;});}
-      else{pairsHtml=`<div class="ev-plan-pair"><div class="ev-part"><span class="muted">—</span></div><div class="plan-part"></div></div>`;}
-      rows+=`<tr class="${cls}"><td class="date-td">${pad(d.getMonth()+1)}/${pad(d.getDate())}</td><td class="dow-td">週${DOW[dow]}</td><td colspan="2" style="padding:0;border-bottom:0.5px solid #f0f0ec">${pairsHtml}</td></tr>`;
-    }
-    if(rows) html+=`<div class="month-block"><div class="month-title">${label}</div><table class="list-table"><colgroup><col class="c-date"><col class="c-dow"><col class="c-ev"><col class="c-plan"></colgroup><thead><tr><th>日期</th><th>星期</th><th>事件</th><th>計劃／備註</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-  }
-  document.getElementById('cal').innerHTML=html||'<div style="color:#aaa;padding:20px 0;font-size:14px">無符合行程</div>';
-  updateStats();
-}
-
-function buildMonthCal(){
-  let html='';
-  for(const mk of Object.keys(months)){
-    const{label,days}=months[mk];
-    const firstD=days[0].d;const year=firstD.getFullYear(),month=firstD.getMonth();
-    html+=`<div class="cal-grid"><div class="cal-grid-title">${label}</div><table class="cal-table"><thead><tr>`;
-    ['日','一','二','三','四','五','六'].forEach((h,i)=>html+=`<th class="${i===0?'sun-h':i===6?'sat-h':''}">${h}</th>`);
-    html+=`</tr></thead><tbody>`;
-    const firstDay=new Date(year,month,1).getDay();const daysInMonth=new Date(year,month+1,0).getDate();
-    let day=1;
-    for(let row=0;row<6;row++){
-      html+='<tr>';
-      for(let col=0;col<7;col++){
-        const ci=row*7+col;
-        if(ci<firstDay||day>daysInMonth){html+='<td class="cal-cell empty"></td>';}
-        else{
-          const td=new Date(year,month,day);td.setHours(0,0,0,0);
-          const inW=td>=calStart&&td<=calEnd;
-          const isPast=!inW&&td<calStart;
-          const isToday=td.getTime()===TODAY.getTime();
-          const evs=getAllEvs(td);
-          const dc=col===0?'sun':col===6?'sat':'';
-          html+=`<td class="cal-cell${isPast?' past':''}"><div class="cal-date-wrap"><span class="cal-dn ${dc}${isToday?' today':''}">${day}</span></div>`;
-          evs.forEach(e=>html+=`<div class="cal-ev cal-ev-${e.w}" title="${tlabel(e.w)}：${e.ev}">${e.calLabel||e.ev}</div>`);
-          html+='</td>';day++;
-        }
-      }
-      html+='</tr>';if(day>daysInMonth) break;
-    }
-    html+=`</tbody></table></div>`;
-  }
-  document.getElementById('cal').innerHTML=html;updateStats();
-}
-
-function todayStr(){return dk(TODAY);}
-
-function positionPopup(popup,triggerEl){
-  const vw=window.innerWidth,vh=window.innerHeight,pw=320;
-  if(!triggerEl){popup.style.top='50%';popup.style.left='50%';popup.style.transform='translate(-50%,-50%)';return;}
-  const r=triggerEl.getBoundingClientRect();
-  let top=r.bottom+8,left=r.left;
-  if(left+pw>vw-8) left=vw-pw-8;
-  if(left<8) left=8;
-  if(top+460>vh-8) top=Math.max(8,r.top-460-8);
-  popup.style.top=top+'px';popup.style.left=left+'px';popup.style.transform='none';
-}
-
-function showModal(title,dateVal,ev,triggerEl){
-  const whoOpts=['d','a','c','f'].map(w=>`<option value="${w}"${ev&&ev.w===w?' selected':''}>${tlabel(w)}</option>`).join('');
-  const del=ev?`<button class="btn-del" onclick="deleteEv()">刪除</button>`:'';
-  document.getElementById('modal-container').innerHTML=`
-  <div class="modal-overlay" onclick="closeModal()"></div>
-  <div class="modal-popup" id="modal-popup">
-    <h3>${title}</h3>
-    <div class="mf">
-      <label>日期</label>
-      <input 
-        type="date" 
-        id="m-date" 
-        value="${dateVal}" 
-        min="${dk(calStart)}"
-        max="${dk(calEnd)}"
-        ${ev?'disabled':''}
-      >
-      ${ev
-        ?'<div class="hint">編輯行程時不可修改日期</div>'
-        :'<div class="hint">只能新增未來 100 天內的行程</div>'
-      }
-    </div>
-    <div class="mf"><label>人物</label><select id="m-who">${whoOpts}</select></div>
-    <div class="mf"><label>事件</label><input type="text" id="m-ev" value="${ev?ev.ev:''}" placeholder="事件名稱"></div>
-    <div class="mf-row">
-      <div class="mf"><label>時間</label><input type="text" id="m-time" value="${ev?ev.time||'':''}" placeholder="14:00"></div>
-      <div class="mf"><label>地點</label><input type="text" id="m-loc" value="${ev?ev.loc||'':''}" placeholder="地點"></div>
-    </div>
-    <div class="mf"><label>對象</label><input type="text" id="m-target" value="${ev?ev.target||'':''}" placeholder="例如：vs 榮富國小（選填）"></div>
-    <div class="mf"><label>計劃／備註</label><input type="text" id="m-note" value="${ev?ev.note||'':''}" placeholder="備註（選填）"></div>
-    <div class="mf"><label>月曆簡記</label><input type="text" id="m-cal" value="${ev?ev.calLabel||'':''}" placeholder="月曆顯示的簡短文字"><div class="hint">留空則自動使用事件名稱</div></div>
-    <div class="modal-actions">${del}<button onclick="closeModal()">取消</button><button class="btn-save" onclick="saveEv()">儲存</button></div>
-  </div>`;
-  positionPopup(document.getElementById('modal-popup'),triggerEl);
-}
-
-let _editDateKey=null,_editEvId=null;
-
-function openAdd(evt,dateKey){
-  _editDateKey=null;_editEvId=null;
-  showModal('新增行程',dateKey||todayStr(),null,evt?evt.currentTarget:null);
-}
-function openEdit(evt,dateKey,evId){
-  evt.stopPropagation();
-  _editDateKey=dateKey;
-  _editEvId=String(evId);
-
-  // 不可在這裡 rebuildEvById()
-  // 因為部分動態行程（例如 07/21 暑期練球）
-  // 每次重建都會重新產生 id，導致抓不到原本事件
-  // render() 時已經建立好 evById，直接使用即可
-
-  let ev=evById[_editEvId]||null;
-
-  // 確保所有欄位都有正確帶入
-  if(ev){
-    ev={
-      id:String(ev.id||''),
-      w:ev.w||'d',
-      ev:ev.ev||'',
-      time:ev.time||'',
-      loc:ev.loc||'',
-      target:ev.target||'',
-      note:ev.note||'',
-      calLabel:ev.calLabel||'',
-      type:ev.type||'',
-      lines:ev.lines||[]
-    };
-
-    // group 類型行程，自動整理時間與地點文字
-    if(ev.type==='group' && Array.isArray(ev.lines) && ev.lines.length){
-      const timeText=ev.lines.map(l=>l.time||'').filter(Boolean).join(' / ');
-      const locText=ev.lines.map(l=>l.loc||'').filter(Boolean).join(' / ');
-
-      if(!ev.time) ev.time=timeText;
-      if(!ev.loc) ev.loc=locText;
-    }
-  }
-
-  showModal('編輯行程',dateKey,ev,evt.currentTarget);
-}
-function closeModal(){document.getElementById('modal-container').innerHTML='';}
-
-function saveEv(){
-  const dateVal=document.getElementById('m-date').value;
-  const selectedDate=new Date(dateVal);
-  selectedDate.setHours(0,0,0,0);
-
-  // 限制只能新增 / 編輯 100 天內日期
-  if(selectedDate<calStart || selectedDate>calEnd){
-    alert('只能建立 100 天內的行程');
-    return;
-  }
-
-  const w=document.getElementById('m-who').value;
-  const evName=document.getElementById('m-ev').value.trim();
-  const calLabelInput=document.getElementById('m-cal').value.trim();
-  const loc=document.getElementById('m-loc').value.trim();
-  const time=document.getElementById('m-time').value.trim();
-  const target=document.getElementById('m-target').value.trim();
-  const note=document.getElementById('m-note').value.trim();
-  if(!evName){alert('請輸入事件名稱');return;}
-  const calLabel=calLabelInput||(evName.length>6?evName.slice(0,6)+'…':evName);
-  if(_editEvId){
-    const isExtra=Object.values(extraEvs).some(arr=>arr.some(e=>String(e.id)===_editEvId));
-    if(isExtra){
-      for(const k of Object.keys(extraEvs)){
-        const idx=extraEvs[k].findIndex(e=>String(e.id)===_editEvId);
-        if(idx>=0){
-          if(k!==dateVal){extraEvs[k].splice(idx,1);if(!extraEvs[dateVal])extraEvs[dateVal]=[];extraEvs[dateVal].push({id:_editEvId,w,ev:evName,calLabel,loc,time,target,note});}
-          else{extraEvs[k][idx]={id:_editEvId,w,ev:evName,calLabel,loc,time,target,note};}
-          break;
-        }
-      }
-    } else {
-      overrideEvs[_editEvId]={w,ev:evName,calLabel,loc,time,target,note};
-    }
-  } else {
-    const newId=String(evIdCounter++);
-    if(!extraEvs[dateVal]) extraEvs[dateVal]=[];
-    extraEvs[dateVal].push({id:newId,w,ev:evName,calLabel,loc,time,target,note});
-  }
-  saveStore();
-  document.getElementById('modal-container').innerHTML='';
-  render();
-}
-
-function deleteEv(){
-  if(!_editEvId){
-    closeModal();
-    return;
-  }
-
-  const confirmDelete=confirm('確定要刪除此行程嗎？\n刪除後將無法復原。');
-
-  if(!confirmDelete) return;
-
-  const isExtra=Object.values(extraEvs).some(arr=>arr.some(e=>String(e.id)===_editEvId));
-
-  if(isExtra){
-    for(const k of Object.keys(extraEvs)){
-      extraEvs[k]=extraEvs[k].filter(e=>String(e.id)!==_editEvId);
-    }
-  }else{
-    deletedIds.add(_editEvId);
-    delete overrideEvs[_editEvId];
-  }
-
-  saveStore();
-  document.getElementById('modal-container').innerHTML='';
-  render();
-}
-
-(async()=>{
-
-  await loadStore();
-
-  render();
-
-})();
 </script>
+
 </body>
 </html>
