@@ -51,28 +51,7 @@ tr:last-child td{border-bottom:none}
 .edit-btn{display:none}
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;z-index:999;background:transparent}
-.modal-popup{
-  position:fixed;
-  z-index:9999;
-
-  width:min(92vw,420px);
-  max-height:85vh;
-
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-
-  background:#fff;
-  border-radius:18px;
-
-  padding:18px;
-  box-sizing:border-box;
-
-  box-shadow:0 10px 35px rgba(0,0,0,.18);
-
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-}
+.modal-popup{position:fixed;z-index:1000;background:#fff;border-radius:14px;padding:18px;width:320px;max-width:94vw;border:0.5px solid #e0e0da;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
 .modal-popup h3{font-size:15px;font-weight:600;margin-bottom:13px;color:#1a1a1a}
 .mf{margin-bottom:9px}
 .mf label{font-size:12px;color:#888;display:block;margin-bottom:2px}
@@ -82,21 +61,14 @@ tr:last-child td{border-bottom:none}
 .mf-row{display:flex;gap:8px;margin-bottom:9px}
 .mf-row .mf{flex:1;margin-bottom:0}
 .modal-actions{
-  position:sticky;
-  bottom:-18px;
-
-  background:#fff;
-
-  padding-top:14px;
-  padding-bottom:4px;
-
-  display:flex;
-  gap:10px;
-  justify-content:flex-end;
-
-  border-top:1px solid #eee;
-
-  margin-top:18px;
+display:flex;
+gap:10px;
+justify-content:flex-end;
+align-items:center;
+margin-top:18px;
+padding-top:14px;
+border-top:1px solid #eee;
+flex-wrap:nowrap
 }
 .modal-actions button{
 flex:1;
@@ -137,42 +109,12 @@ border-color:#E24B4A!important
 .cal-dn{display:inline-block;font-size:12px;font-weight:500;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;color:#1a1a1a}
 .cal-dn.sun{color:#d94f4f}.cal-dn.sat{color:#2a6db5}
 .cal-dn.today{background:#E24B4A;color:#fff;box-shadow:0 0 0 2px rgba(228,75,74,0.22),0 1px 5px rgba(228,75,74,0.4)}
-.cal-ev{
-  font-size:13px;
-  line-height:1.35;
-
-  padding:3px 6px;
-  margin-top:4px;
-
-  border-radius:8px;
-
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
+.cal-ev{font-size:9px;padding:1px 3px;border-radius:3px;margin-bottom:1px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
 .cal-ev-d{background:#B5D4F4;color:#0C447C}.cal-ev-a{background:#FAC775;color:#633806}
 .cal-ev-c{background:#C0DD97;color:#27500A}.cal-ev-f{background:#EEEDFE;color:#3C3489}
 .save-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;font-size:13px;padding:8px 20px;border-radius:20px;z-index:3000;opacity:0;transition:opacity .3s;pointer-events:none}
 .save-toast.show{opacity:1}
 @media(max-width:600px){col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{width:70px}}
-@media (max-width:768px){
-
-  .cal-ev{
-    font-size:12px;
-    padding:2px 5px;
-  }
-
-  .list-table{
-    font-size:13px;
-  }
-
-  .modal-popup{
-    width:94vw;
-    max-height:88vh;
-    padding:16px;
-  }
-
-}
 </style>
 </head>
 <body>
