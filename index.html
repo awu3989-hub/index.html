@@ -275,7 +275,35 @@ async function loadStore(){
 
 // ===== 儲存 =====
 
-async function saveStore(){
+async function saveStore() {
+  try {
+    setCloudStatus("saving");
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        action: "save",
+        data: store
+      })
+    });
+
+    const json = await res.json();
+
+    if (json.ok) {
+      setCloudStatus("cloud");
+    } else {
+      setCloudStatus("local");
+      console.error("cloud save failed", json);
+    }
+
+  } catch (err) {
+    console.error("cloud save error", err);
+    setCloudStatus("local");
+  }
+}{
 
   const data = {
 
