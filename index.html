@@ -201,7 +201,31 @@ let overrideEvs={},
 
 // ===== 載入 =====
 
-async function loadStore(){
+function loadStore(){
+
+  const callbackName =
+    'jsonp_callback_' + Date.now();
+
+  window[callbackName] = function(data){
+
+    overrideEvs = data.overrideEvs || {};
+    extraEvs = data.extraEvs || {};
+    deletedIds = new Set(data.deletedIds || []);
+
+    render();
+
+    delete window[callbackName];
+  };
+
+  const script = document.createElement('script');
+
+  script.src =
+    API_URL +
+    '?action=load&callback=' +
+    callbackName;
+
+  document.body.appendChild(script);
+}
 
   try{
 
