@@ -17,12 +17,30 @@ h1{font-size:20px;font-weight:500;margin-bottom:20px;color:#1a1a1a}
 .global-add-btn:hover{background:#0f4a8c}
 .stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
 .stat{background:#fff;border-radius:8px;padding:10px 20px;text-align:center;min-width:80px;border:0.5px solid #e0e0da}
+  .sched-card{
+  cursor:pointer;
+  transition:.2s;
+}
+
+.sched-card:hover{
+  transform:translateY(-2px);
+}
+
+.sched-card.on{
+  background:#d8b56a;
+  color:#fff;
+}
+
+.sched-card.on .stat-label,
+.sched-card.on .stat-num{
+  color:#fff !important;
+}
 .stat-label{font-size:12px;color:#888;margin-bottom:4px}
 .stat-num{font-size:26px;font-weight:500;color:#1a1a1a}
 .filter-section{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
 .filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.sched-btn{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid #888;background:transparent;color:#555;cursor:pointer;transition:all .18s;font-weight:500}
-.sched-btn.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.sched-card{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid #888;background:transparent;color:#555;cursor:pointer;transition:all .18s;font-weight:500}
+.sched-card.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
 .who-btn{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid transparent;cursor:pointer;transition:all .18s;font-weight:500}
 .who-d{background:#EAF3FC;color:#0C447C;border-color:#B5D4F4}.who-d.on{background:#185FA5;color:#fff;border-color:#185FA5;box-shadow:0 2px 8px rgba(24,95,165,0.35)}
 .who-a{background:#FEF3E2;color:#633806;border-color:#FAC775}.who-a.on{background:#C87B0A;color:#fff;border-color:#C87B0A;box-shadow:0 2px 8px rgba(200,123,10,0.35)}
@@ -145,16 +163,34 @@ col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{widt
   </div>
 </div>
 <div class="stats">
-  <div class="stat"><div class="stat-label">總天數</div><div class="stat-num" id="stotal">100</div></div>
-  <div class="stat"><div class="stat-label">有行程</div><div class="stat-num" id="shas">0</div></div>
-  <div class="stat"><div class="stat-label">無行程</div><div class="stat-num" id="snone">0</div></div>
-</div>
-<div class="filter-section" id="filter-section">
-  <div class="filter-row">
-    <button class="sched-btn on" onclick="setSched('all',this)">全部行程</button>
-    <button class="sched-btn" onclick="setSched('has',this)">有行程</button>
-    <button class="sched-btn" onclick="setSched('none',this)">無行程</button>
+
+  <div
+    class="stat sched-card on"
+    onclick="setSched('all',this)"
+  >
+    <div class="stat-label">總天數</div>
+    <div class="stat-num" id="stotal">100</div>
   </div>
+
+  <div
+    class="stat sched-card"
+    onclick="setSched('has',this)"
+  >
+    <div class="stat-label">有行程</div>
+    <div class="stat-num" id="shas">0</div>
+  </div>
+
+  <div
+    class="stat sched-card"
+    onclick="setSched('none',this)"
+  >
+    <div class="stat-label">無行程</div>
+    <div class="stat-num" id="snone">0</div>
+  </div>
+
+</div>
+
+<div class="filter-section" id="filter-section">
   <div class="filter-row">
     <button class="who-btn who-d" onclick="setWho('d',this)">丁哥</button>
     <button class="who-btn who-a" onclick="setWho('a',this)">阿多</button>
@@ -542,10 +578,19 @@ function renderEvLine(e,dateKey){
 
 let activeSchedule='all',activeWho='',activeView='list';
 function setView(v,btn){activeView=v;document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('filter-section').style.display=v==='list'?'flex':'none';render();}
-function setSched(f,btn){activeSchedule=f;activeWho='';document.querySelectorAll('.sched-btn').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render();}
-function setWho(w,btn){
-  if(activeWho===w){activeWho='';btn.classList.remove('on');document.querySelector('.sched-btn').classList.add('on');}
-  else{activeWho=w;activeSchedule='all';document.querySelectorAll('.sched-btn').forEach(b=>b.classList.remove('on'));document.querySelector('.sched-btn').classList.add('on');document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function setSched(f,btn){
+
+  activeSchedule=f;
+  activeWho='';
+
+  document.querySelectorAll('.sched-card')
+    .forEach(b=>b.classList.remove('on'));
+
+  document.querySelectorAll('.who-btn')
+    .forEach(b=>b.classList.remove('on'));
+
+  btn.classList.add('on');
+
   render();
 }
 function render(){rebuildEvById();activeView==='list'?buildList():buildMonthCal();}
