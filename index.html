@@ -109,7 +109,15 @@ box-shadow:0 2px 8px rgba(226,75,74,0.35)!important;
 white-space:nowrap!important;
 letter-spacing:.02em!important
 }
-/* CAL */
+/* MODAL COPY-PASTE BAR */
+.cp-bar{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:9px;border-top:1px dashed #e8e8e4}
+.cp-btn{font-size:13px;font-weight:600;padding:8px 0;border-radius:10px;border:1px solid #d8d8d4;background:#f7f7f5;color:#555;cursor:pointer;transition:all .18s;white-space:nowrap;flex:1;text-align:center;opacity:0.72}
+.cp-btn:hover{filter:brightness(.93);opacity:1}
+.cp-btn-copy{border-color:#185FA5;color:#185FA5;background:#EAF3FC}
+.cp-btn-paste{border-color:#C8940A;color:#7a5200;background:#FEF3C7}
+.cp-btn-clear{border-color:#d8d8d4;color:#999;background:#f0f0ee}
+.cp-btn-clear.has-data{border-color:#3A7A10!important;color:#fff!important;background:#3A7A10!important;opacity:1!important}
+.cp-btn-flash{opacity:0.4;pointer-events:none}
 .cal-grid{margin-bottom:2rem}
 .cal-grid-title{font-size:16px;font-weight:500;color:#1a1a1a;margin:18px 0 8px;padding-bottom:6px;border-bottom:0.5px solid #ddd}
 .cal-table{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff;border-radius:8px;overflow:hidden;border:0.5px solid #e0e0da}
@@ -161,14 +169,14 @@ col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{widt
 <div class="container">
 <h1>黃家100天行事曆</h1>
 <div class="top-bar">
-  <div class="view-toggle">
-    <button class="view-btn" onclick="setView('month',this)">📅 月曆</button>
-    <button class="view-btn on" onclick="setView('list',this)">📋 行事曆</button>
-  </div>
-  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <div class="view-toggle">
+      <button class="view-btn" onclick="setView('month',this)">📅 月曆</button>
+      <button class="view-btn on" onclick="setView('list',this)">📋 行事曆</button>
+    </div>
     <span class="sync-badge sync-loading" id="sync-badge"><span class="sync-dot"></span><span id="sync-text">連線中</span></span>
-    <button class="global-add-btn" id="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
   </div>
+  <button class="global-add-btn" id="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
 </div>
 <div class="stats">
   <div class="stat on" id="stat-all" onclick="setSchedCard('all')"><div class="stat-label">總天數</div><div class="stat-num" id="stotal">100</div></div>
@@ -668,7 +676,7 @@ function positionPopup(popup,triggerEl){
 
 function showModal(title,dateVal,ev,triggerEl){
   const whoOpts=['d','a','c','f'].map(w=>`<option value="${w}"${ev&&ev.w===w?' selected':''}>${tlabel(w)}</option>`).join('');
-  const del=ev?`<button class="btn-del" id="btn-del-ev">🗑 刪除行程</button>`:'';
+  const del=ev?`<button class="btn-del" id="btn-del-ev" onclick="handleDelEv(event,'${ev.id}')">🗑 刪除行程</button>`:'';
   document.getElementById('modal-container').innerHTML=`
   <div class="modal-overlay" onclick="closeModal()"></div>
   <div class="modal-popup" id="modal-popup">
@@ -702,34 +710,88 @@ function showModal(title,dateVal,ev,triggerEl){
       <div class="mf"><label>註記</label><input type="text" id="m-note" value="${ev?ev.note||'':''}" placeholder=""></div>
     </div>
     <div class="mf"><label>月曆簡記</label><input type="text" id="m-cal" value="${ev?ev.calLabel||'':''}" placeholder="月曆顯示的簡短文字"><div class="hint">留空則自動使用事件名稱</div></div>
+    <div class="cp-bar">
+      <button class="cp-btn cp-btn-copy" id="cp-btn-copy">複製</button>
+      <button class="cp-btn cp-btn-paste" id="cp-btn-paste">貼上</button>
+      <button class="cp-btn cp-btn-clear${_clipBoard?' has-data':''}" id="cp-btn-clear">取消</button>
+    </div>
     <div class="modal-actions"><button onclick="closeModal()">關閉</button><button class="btn-save" onclick="saveEv()">儲存</button></div>
   </div>`;
   positionPopup(document.getElementById('modal-popup'),triggerEl);
-  const delBtn=document.getElementById('btn-del-ev');
-  if(delBtn){
-    const evIdToDelete=_editEvId;
-    delBtn.addEventListener('click', function(e){
-      e.stopPropagation();
-      if(!evIdToDelete){ closeModal(); return; }
-      const confirmDelete=confirm('確定要刪除此行程嗎？\n刪除後將無法復原。');
-      if(!confirmDelete) return;
-      const isExtra=Object.values(extraEvs).some(arr=>arr.some(e=>String(e.id)===evIdToDelete));
-      if(isExtra){
-        for(const k of Object.keys(extraEvs)){
-          extraEvs[k]=extraEvs[k].filter(e=>String(e.id)!==evIdToDelete);
-        }
-      }else{
-        deletedIds.add(evIdToDelete);
-        delete overrideEvs[evIdToDelete];
-      }
-      saveStore();
-      document.getElementById('modal-container').innerHTML='';
-      render();
-    });
+
+  // ── 複製 / 貼上 / 取消 ──
+  function getModalFields(){
+    return {
+      w: document.getElementById('m-who').value,
+      ev: document.getElementById('m-ev').value,
+      time: document.getElementById('m-time').value,
+      loc: document.getElementById('m-loc').value,
+      target: document.getElementById('m-target').value,
+      note: document.getElementById('m-note').value,
+      calLabel: document.getElementById('m-cal').value
+    };
   }
+  function setModalFields(d){
+    document.getElementById('m-who').value = d.w||'d';
+    document.getElementById('m-ev').value = d.ev||'';
+    document.getElementById('m-time').value = d.time||'';
+    document.getElementById('m-loc').value = d.loc||'';
+    document.getElementById('m-target').value = d.target||'';
+    document.getElementById('m-note').value = d.note||'';
+    document.getElementById('m-cal').value = d.calLabel||'';
+  }
+  function flashBtn(btn, msg){
+    const orig=btn.textContent;
+    btn.textContent=msg;
+    btn.classList.add('cp-btn-flash');
+    setTimeout(()=>{btn.textContent=orig;btn.classList.remove('cp-btn-flash');},1200);
+  }
+  function updateClearBtn(){
+    const clr=document.getElementById('cp-btn-clear');
+    if(clr){ if(_clipBoard) clr.classList.add('has-data'); else clr.classList.remove('has-data'); }
+  }
+  const cpCopy=document.getElementById('cp-btn-copy');
+  if(cpCopy) cpCopy.addEventListener('click',function(e){
+    e.stopPropagation();
+    _clipBoard=getModalFields();
+    flashBtn(this,'✓ 已複製');
+    updateClearBtn();
+  });
+  const cpPaste=document.getElementById('cp-btn-paste');
+  if(cpPaste) cpPaste.addEventListener('click',function(e){
+    e.stopPropagation();
+    if(!_clipBoard) return;
+    setModalFields(_clipBoard);
+    flashBtn(this,'✓ 已貼上');
+  });
+  const cpClear=document.getElementById('cp-btn-clear');
+  if(cpClear) cpClear.addEventListener('click',function(e){
+    e.stopPropagation();
+    _clipBoard=null;
+    updateClearBtn();
+  });
 }
 
-let _editDateKey=null,_editEvId=null;
+function handleDelEv(e, evIdToDelete){
+  e.stopPropagation();
+  if(!evIdToDelete){ closeModal(); return; }
+  const confirmDelete=confirm('確定要刪除此行程嗎？\n刪除後將無法復原。');
+  if(!confirmDelete) return;
+  const isExtra=Object.values(extraEvs).some(arr=>arr.some(e=>String(e.id)===evIdToDelete));
+  if(isExtra){
+    for(const k of Object.keys(extraEvs)){
+      extraEvs[k]=extraEvs[k].filter(e=>String(e.id)!==evIdToDelete);
+    }
+  }else{
+    deletedIds.add(evIdToDelete);
+    delete overrideEvs[evIdToDelete];
+  }
+  saveStore();
+  document.getElementById('modal-container').innerHTML='';
+  render();
+}
+
+let _editDateKey=null,_editEvId=null,_clipBoard=null;
 
 function openAdd(evt,dateKey){
   _editDateKey=null;_editEvId=null;
