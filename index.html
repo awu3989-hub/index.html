@@ -16,13 +16,13 @@ h1{font-size:20px;font-weight:500;margin-bottom:20px;color:#1a1a1a}
 .global-add-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:8px 18px;border-radius:12px;border:2px solid #185FA5;background:#185FA5;color:#fff;cursor:pointer;white-space:nowrap}
 .global-add-btn:hover{background:#0f4a8c}
 .stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.stat{background:#fff;border-radius:12px;padding:10px 20px;text-align:center;min-width:80px;border:0.5px solid #e0e0da;cursor:pointer;transition:all .2s;user-select:none}
+.stat{background:#fff;border-radius:10px;padding:6px 16px;text-align:center;min-width:72px;border:0.5px solid #e0e0da;cursor:pointer;transition:all .2s;user-select:none}
 .stat:hover{border-color:#aaa;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
-.stat.on{background:#1a1a1a;border-color:#1a1a1a;box-shadow:0 3px 12px rgba(0,0,0,0.22)}
-.stat.on .stat-label{color:#bbb}
+.stat.on{background:#555;border-color:#555;box-shadow:0 3px 12px rgba(0,0,0,0.22)}
+.stat.on .stat-label{color:#ddd}
 .stat.on .stat-num{color:#fff}
-.stat-label{font-size:12px;color:#888;margin-bottom:4px}
-.stat-num{font-size:26px;font-weight:500;color:#1a1a1a}
+.stat-label{font-size:11px;color:#888;margin-bottom:2px}
+.stat-num{font-size:20px;font-weight:600;color:#1a1a1a}
 .filter-section{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
 .filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .sched-btn{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid #888;background:transparent;color:#555;cursor:pointer;transition:all .18s;font-weight:500}
@@ -98,7 +98,16 @@ border-color:#185FA5!important
 .btn-del{
 background:#E24B4A!important;
 color:#fff!important;
-border-color:#E24B4A!important
+border-color:#C0302F!important;
+flex:none!important;
+padding:0 16px!important;
+height:44px!important;
+font-size:13px!important;
+font-weight:600!important;
+border-radius:10px!important;
+box-shadow:0 2px 8px rgba(226,75,74,0.35)!important;
+white-space:nowrap!important;
+letter-spacing:.02em!important
 }
 /* CAL */
 .cal-grid{margin-bottom:2rem}
@@ -157,7 +166,7 @@ col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{widt
     <button class="view-btn on" onclick="setView('list',this)">📋 行事曆</button>
   </div>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-    <span class="sync-badge sync-loading" id="sync-badge"><span class="sync-dot"></span><span id="sync-text">連線中…</span></span>
+    <span class="sync-badge sync-loading" id="sync-badge"><span class="sync-dot"></span><span id="sync-text">連線中</span></span>
     <button class="global-add-btn" id="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
   </div>
 </div>
@@ -310,13 +319,13 @@ function setSyncBadge(mode){
   if(!badge||!text) return;
   if(mode==='cloud'){
     badge.className='sync-badge sync-cloud';
-    text.textContent='☁ 雲端同步';
+    text.textContent='☁ 同步';
   }else if(mode==='local'){
     badge.className='sync-badge sync-local';
-    text.textContent='⚠ 本機資料';
+    text.textContent='⚠ 本機';
   }else{
     badge.className='sync-badge sync-loading';
-    text.textContent='連線中…';
+    text.textContent='連線中';
   }
 }
 
@@ -659,25 +668,28 @@ function positionPopup(popup,triggerEl){
 
 function showModal(title,dateVal,ev,triggerEl){
   const whoOpts=['d','a','c','f'].map(w=>`<option value="${w}"${ev&&ev.w===w?' selected':''}>${tlabel(w)}</option>`).join('');
-  const del=ev?`<button class="btn-del" onclick="deleteEv()">刪除</button>`:'';
+  const del=ev?`<button class="btn-del" id="btn-del-ev">🗑 刪除行程</button>`:'';
   document.getElementById('modal-container').innerHTML=`
   <div class="modal-overlay" onclick="closeModal()"></div>
   <div class="modal-popup" id="modal-popup">
     <h3>${title}</h3>
-    <div class="mf">
-      <label>日期</label>
-      <input 
-        type="date" 
-        id="m-date" 
-        value="${dateVal}" 
-        min="${dk(calStart)}"
-        max="${dk(calEnd)}"
-        ${ev?'disabled':''}
-      >
-      ${ev
-        ?'<div class="hint">編輯行程時不可修改日期</div>'
-        :'<div class="hint">只能新增未來 100 天內的行程</div>'
-      }
+    <div class="mf" style="display:flex;align-items:flex-end;gap:8px">
+      <div style="flex:1">
+        <label>日期</label>
+        <input 
+          type="date" 
+          id="m-date" 
+          value="${dateVal}" 
+          min="${dk(calStart)}"
+          max="${dk(calEnd)}"
+          ${ev?'disabled':''}
+        >
+        ${ev
+          ?'<div class="hint">編輯行程時不可修改日期</div>'
+          :'<div class="hint">只能新增未來 100 天內的行程</div>'
+        }
+      </div>
+      ${del?`<div style="flex-shrink:0;padding-bottom:${ev?'18px':'2px'}">${del}</div>`:''}
     </div>
     <div class="mf"><label>人物</label><select id="m-who">${whoOpts}</select></div>
     <div class="mf"><label>事件</label><input type="text" id="m-ev" value="${ev?ev.ev:''}" placeholder="事件名稱"></div>
@@ -685,12 +697,36 @@ function showModal(title,dateVal,ev,triggerEl){
       <div class="mf"><label>時間</label><input type="text" id="m-time" value="${ev?ev.time||'':''}" placeholder="14:00"></div>
       <div class="mf"><label>地點</label><input type="text" id="m-loc" value="${ev?ev.loc||'':''}" placeholder="地點"></div>
     </div>
-    <div class="mf"><label>對象</label><input type="text" id="m-target" value="${ev?ev.target||'':''}" placeholder=""></div>
-    <div class="mf"><label>備註</label><input type="text" id="m-note" value="${ev?ev.note||'':''}" placeholder=""></div>
+    <div class="mf-row">
+      <div class="mf"><label>對象</label><input type="text" id="m-target" value="${ev?ev.target||'':''}" placeholder=""></div>
+      <div class="mf"><label>註記</label><input type="text" id="m-note" value="${ev?ev.note||'':''}" placeholder=""></div>
+    </div>
     <div class="mf"><label>月曆簡記</label><input type="text" id="m-cal" value="${ev?ev.calLabel||'':''}" placeholder="月曆顯示的簡短文字"><div class="hint">留空則自動使用事件名稱</div></div>
-    <div class="modal-actions">${del}<button onclick="closeModal()">取消</button><button class="btn-save" onclick="saveEv()">儲存</button></div>
+    <div class="modal-actions"><button onclick="closeModal()">關閉</button><button class="btn-save" onclick="saveEv()">儲存</button></div>
   </div>`;
   positionPopup(document.getElementById('modal-popup'),triggerEl);
+  const delBtn=document.getElementById('btn-del-ev');
+  if(delBtn){
+    const evIdToDelete=_editEvId;
+    delBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(!evIdToDelete){ closeModal(); return; }
+      const confirmDelete=confirm('確定要刪除此行程嗎？\n刪除後將無法復原。');
+      if(!confirmDelete) return;
+      const isExtra=Object.values(extraEvs).some(arr=>arr.some(e=>String(e.id)===evIdToDelete));
+      if(isExtra){
+        for(const k of Object.keys(extraEvs)){
+          extraEvs[k]=extraEvs[k].filter(e=>String(e.id)!==evIdToDelete);
+        }
+      }else{
+        deletedIds.add(evIdToDelete);
+        delete overrideEvs[evIdToDelete];
+      }
+      saveStore();
+      document.getElementById('modal-container').innerHTML='';
+      render();
+    });
+  }
 }
 
 let _editDateKey=null,_editEvId=null;
