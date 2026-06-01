@@ -10,13 +10,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Helv
 .container{max-width:860px;margin:0 auto}
 h1{font-size:20px;font-weight:500;margin-bottom:20px;color:#1a1a1a}
 .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
-.view-toggle{display:flex;gap:8px}
-.view-btn{font-size:14px;font-weight:500;padding:8px 18px;border-radius:12px;border:2px solid #ccc;background:#f0f0ee;color:#888;cursor:pointer;transition:all .2s}
-.view-btn.on{border-color:#185FA5;background:#185FA5;color:#fff;box-shadow:0 3px 10px rgba(24,95,165,0.25)}
+.view-toggle{display:flex;background:#e8e8e5;border-radius:999px;padding:4px;gap:0;border:1px solid #d8d8d4}
+.view-btn{font-size:15px;font-weight:600;padding:10px 28px;border-radius:999px;border:none;background:transparent;color:#888;cursor:pointer;transition:all .22s;letter-spacing:.02em;white-space:nowrap}
+.view-btn.on{background:#F5C842;color:#185FA5;box-shadow:0 3px 12px rgba(0,0,0,0.18),0 1px 3px rgba(0,0,0,0.10);transform:translateY(-1px)}
 .global-add-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:8px 18px;border-radius:12px;border:2px solid #185FA5;background:#185FA5;color:#fff;cursor:pointer;white-space:nowrap}
 .global-add-btn:hover{background:#0f4a8c}
 .stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.stat{background:#fff;border-radius:8px;padding:10px 20px;text-align:center;min-width:80px;border:0.5px solid #e0e0da}
+.stat{background:#fff;border-radius:12px;padding:10px 20px;text-align:center;min-width:80px;border:0.5px solid #e0e0da;cursor:pointer;transition:all .2s;user-select:none}
+.stat:hover{border-color:#aaa;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.stat.on{background:#1a1a1a;border-color:#1a1a1a;box-shadow:0 3px 12px rgba(0,0,0,0.22)}
+.stat.on .stat-label{color:#bbb}
+.stat.on .stat-num{color:#fff}
 .stat-label{font-size:12px;color:#888;margin-bottom:4px}
 .stat-num{font-size:26px;font-weight:500;color:#1a1a1a}
 .filter-section{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
@@ -109,12 +113,25 @@ border-color:#E24B4A!important
 .cal-dn{display:inline-block;font-size:12px;font-weight:500;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;color:#1a1a1a}
 .cal-dn.sun{color:#d94f4f}.cal-dn.sat{color:#2a6db5}
 .cal-dn.today{background:#E24B4A;color:#fff;box-shadow:0 0 0 2px rgba(228,75,74,0.22),0 1px 5px rgba(228,75,74,0.4)}
-.cal-ev{font-size:9px;padding:1px 3px;border-radius:3px;margin-bottom:1px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.cal-ev{font-size:9px;padding:1px 3px;border-radius:3px;margin-bottom:1px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;cursor:pointer;transition:opacity .15s}
+.cal-ev:hover{opacity:0.72}
+/* 月曆簡記快速編輯 */
+.qe-overlay{position:fixed;inset:0;z-index:998;background:rgba(0,0,0,0.3)}
+.qe-popup{position:fixed;z-index:999;background:#fff;border-radius:14px;padding:16px 18px;width:270px;max-width:92vw;border:0.5px solid #e0e0da;box-shadow:0 8px 28px rgba(0,0,0,0.18)}
+.qe-popup .qe-who{font-size:11px;font-weight:600;padding:1px 7px;border-radius:20px;display:inline-block;margin-bottom:6px}
+.qe-popup .qe-evname{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:10px}
+.qe-popup label{font-size:12px;color:#888;display:block;margin-bottom:3px}
+.qe-popup input{width:100%;font-size:14px;padding:7px 9px;border-radius:8px;border:1.5px solid #ccc;outline:none;color:#1a1a1a}
+.qe-popup input:focus{border-color:#185FA5;box-shadow:0 0 0 2px rgba(24,95,165,0.12)}
+.qe-hint{font-size:11px;color:#aaa;margin-top:3px;margin-bottom:12px}
+.qe-actions{display:flex;gap:8px}
+.qe-actions button{flex:1;height:38px;font-size:13px;font-weight:600;border-radius:9px;border:1px solid #d8d8d8;cursor:pointer;background:#f7f7f5;color:#333;transition:all .15s}
+.qe-btn-save{background:#185FA5!important;color:#fff!important;border-color:#185FA5!important}
 .cal-ev-d{background:#B5D4F4;color:#0C447C}.cal-ev-a{background:#FAC775;color:#633806}
 .cal-ev-c{background:#C0DD97;color:#27500A}.cal-ev-f{background:#EEEDFE;color:#3C3489}
 .save-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;font-size:13px;padding:8px 20px;border-radius:20px;z-index:3000;opacity:0;transition:opacity .3s;pointer-events:none}
 .save-toast.show{opacity:1}
-.sync-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:20px;font-weight:500;white-space:nowrap;border:1px solid}
+.sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap;border:1px solid}
 .sync-cloud{background:#E6F4EA;color:#1a7340;border-color:#b7dfbf}
 .sync-local{background:#FEF3E2;color:#7a4e0a;border-color:#f5c97a}
 .sync-loading{background:#f0f0ee;color:#888;border-color:#ddd}
@@ -139,22 +156,17 @@ col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{widt
     <button class="view-btn" onclick="setView('month',this)">📅 月曆</button>
     <button class="view-btn on" onclick="setView('list',this)">📋 行事曆</button>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
     <span class="sync-badge sync-loading" id="sync-badge"><span class="sync-dot"></span><span id="sync-text">連線中…</span></span>
-    <button class="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
+    <button class="global-add-btn" id="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
   </div>
 </div>
 <div class="stats">
-  <div class="stat"><div class="stat-label">總天數</div><div class="stat-num" id="stotal">100</div></div>
-  <div class="stat"><div class="stat-label">有行程</div><div class="stat-num" id="shas">0</div></div>
-  <div class="stat"><div class="stat-label">無行程</div><div class="stat-num" id="snone">0</div></div>
+  <div class="stat on" id="stat-all" onclick="setSchedCard('all')"><div class="stat-label">總天數</div><div class="stat-num" id="stotal">100</div></div>
+  <div class="stat" id="stat-has" onclick="setSchedCard('has')"><div class="stat-label">有行程</div><div class="stat-num" id="shas">0</div></div>
+  <div class="stat" id="stat-none" onclick="setSchedCard('none')"><div class="stat-label">無行程</div><div class="stat-num" id="snone">0</div></div>
 </div>
 <div class="filter-section" id="filter-section">
-  <div class="filter-row">
-    <button class="sched-btn on" onclick="setSched('all',this)">全部行程</button>
-    <button class="sched-btn" onclick="setSched('has',this)">有行程</button>
-    <button class="sched-btn" onclick="setSched('none',this)">無行程</button>
-  </div>
   <div class="filter-row">
     <button class="who-btn who-d" onclick="setWho('d',this)">丁哥</button>
     <button class="who-btn who-a" onclick="setWho('a',this)">阿多</button>
@@ -541,11 +553,29 @@ function renderEvLine(e,dateKey){
 }
 
 let activeSchedule='all',activeWho='',activeView='list';
-function setView(v,btn){activeView=v;document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('filter-section').style.display=v==='list'?'flex':'none';render();}
+function setView(v,btn){
+  activeView=v;
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const isMonth=v==='month';
+  document.getElementById('filter-section').style.display=isMonth?'none':'flex';
+  document.querySelector('.stats').style.display=isMonth?'none':'flex';
+  const addBtn=document.getElementById('global-add-btn');
+  if(addBtn) addBtn.style.display=isMonth?'none':'';
+  render();
+}
+function setSchedCard(f){
+  activeSchedule=f;activeWho='';
+  document.querySelectorAll('.stat').forEach(c=>c.classList.remove('on'));
+  const map={all:'stat-all',has:'stat-has',none:'stat-none'};
+  const el=document.getElementById(map[f]);if(el)el.classList.add('on');
+  document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));
+  render();
+}
 function setSched(f,btn){activeSchedule=f;activeWho='';document.querySelectorAll('.sched-btn').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render();}
 function setWho(w,btn){
-  if(activeWho===w){activeWho='';btn.classList.remove('on');document.querySelector('.sched-btn').classList.add('on');}
-  else{activeWho=w;activeSchedule='all';document.querySelectorAll('.sched-btn').forEach(b=>b.classList.remove('on'));document.querySelector('.sched-btn').classList.add('on');document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+  if(activeWho===w){activeWho='';btn.classList.remove('on');setSchedCard('all');}
+  else{activeWho=w;activeSchedule='all';document.querySelectorAll('.stat').forEach(c=>c.classList.remove('on'));document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
   render();
 }
 function render(){rebuildEvById();activeView==='list'?buildList():buildMonthCal();}
@@ -570,7 +600,7 @@ function buildList(){
       else{pairsHtml=`<div class="ev-plan-pair"><div class="ev-part"><span class="muted">—</span></div><div class="plan-part"></div></div>`;}
       rows+=`<tr class="${cls}"><td class="date-td">${pad(d.getMonth()+1)}/${pad(d.getDate())}</td><td class="dow-td">週${DOW[dow]}</td><td colspan="2" style="padding:0;border-bottom:0.5px solid #f0f0ec">${pairsHtml}</td></tr>`;
     }
-    if(rows) html+=`<div class="month-block"><div class="month-title">${label}</div><table class="list-table"><colgroup><col class="c-date"><col class="c-dow"><col class="c-ev"><col class="c-plan"></colgroup><thead><tr><th>日期</th><th>星期</th><th>事件</th><th>計劃／備註</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    if(rows) html+=`<div class="month-block"><div class="month-title">${label}</div><table class="list-table"><colgroup><col class="c-date"><col class="c-dow"><col class="c-ev"><col class="c-plan"></colgroup><thead><tr><th>日期</th><th>星期</th><th>事件</th><th>註記</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
   document.getElementById('cal').innerHTML=html||'<div style="color:#aaa;padding:20px 0;font-size:14px">無符合行程</div>';
   updateStats();
@@ -599,7 +629,7 @@ function buildMonthCal(){
           const evs=getAllEvs(td);
           const dc=col===0?'sun':col===6?'sat':'';
           html+=`<td class="cal-cell${isPast?' past':''}"><div class="cal-date-wrap"><span class="cal-dn ${dc}${isToday?' today':''}">${day}</span></div>`;
-          evs.forEach(e=>html+=`<div class="cal-ev cal-ev-${e.w}" title="${tlabel(e.w)}：${e.ev}">${e.calLabel||e.ev}</div>`);
+          evs.forEach(e=>html+=`<div class="cal-ev cal-ev-${e.w}" onclick="openQuickEdit(event,'${dk(td)}','${e.id}')" title="點擊修改簡記">${e.calLabel||e.ev}</div>`);
           html+='</td>';day++;
         }
       }
@@ -777,6 +807,61 @@ function deleteEv(){
 
   saveStore();
   document.getElementById('modal-container').innerHTML='';
+  render();
+}
+
+// ===== 月曆簡記快速編輯 =====
+let _qeDateKey=null, _qeEvId=null;
+
+function openQuickEdit(evt, dateKey, evId){
+  evt.stopPropagation();
+  _qeDateKey=dateKey;
+  _qeEvId=String(evId);
+  const ev=evById[_qeEvId]||null;
+  if(!ev) return;
+  const curLabel=ev.calLabel||ev.ev||'';
+  const whoClass=tclass(ev.w);
+  const whoLabel=tlabel(ev.w);
+  document.getElementById('modal-container').innerHTML=`
+  <div class="qe-overlay" onclick="closeQuickEdit()"></div>
+  <div class="qe-popup" id="qe-popup">
+    <span class="qe-who tag ${whoClass}">${whoLabel}</span>
+    <div class="qe-evname">${ev.ev}</div>
+    <label>月曆簡記</label>
+    <input type="text" id="qe-input" value="${curLabel}" placeholder="月曆顯示文字" maxlength="12">
+    <div class="qe-hint">留空則自動使用事件名稱</div>
+    <div class="qe-actions">
+      <button onclick="closeQuickEdit()">取消</button>
+      <button class="qe-btn-save" onclick="saveQuickEdit()">儲存</button>
+    </div>
+  </div>`;
+  const popup=document.getElementById('qe-popup');
+  popup.style.position='fixed';
+  popup.style.top='50%';
+  popup.style.left='50%';
+  popup.style.transform='translate(-50%,-50%)';
+  setTimeout(()=>{const inp=document.getElementById('qe-input');if(inp){inp.focus();inp.select();}},50);
+}
+
+function closeQuickEdit(){
+  document.getElementById('modal-container').innerHTML='';
+  _qeDateKey=null; _qeEvId=null;
+}
+
+function saveQuickEdit(){
+  if(!_qeEvId) return;
+  const newLabel=document.getElementById('qe-input').value.trim();
+  const isExtra=Object.values(extraEvs).some(arr=>arr.some(e=>String(e.id)===_qeEvId));
+  if(isExtra){
+    for(const k of Object.keys(extraEvs)){
+      const idx=extraEvs[k].findIndex(e=>String(e.id)===_qeEvId);
+      if(idx>=0){extraEvs[k][idx].calLabel=newLabel;break;}
+    }
+  } else {
+    overrideEvs[_qeEvId]={...(overrideEvs[_qeEvId]||{}), calLabel:newLabel};
+  }
+  saveStore();
+  closeQuickEdit();
   render();
 }
 
