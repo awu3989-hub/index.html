@@ -9,7 +9,7 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Helvetica Neue',sans-serif;background:#f5f5f3;color:#1a1a1a;padding:24px 16px;min-height:100vh}
 .container{max-width:860px;margin:0 auto}
 h1{font-size:20px;font-weight:500;margin-bottom:20px;color:#1a1a1a}
-.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.top-bar{display:flex;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px}
 .view-toggle{display:flex;background:#e8e8e5;border-radius:999px;padding:4px;gap:0;border:1px solid #d8d8d4}
 .view-btn{font-size:15px;font-weight:600;padding:10px 28px;border-radius:999px;border:none;background:transparent;color:#888;cursor:pointer;transition:all .22s;letter-spacing:.02em;white-space:nowrap}
 .view-btn.on{background:#F5C842;color:#185FA5;box-shadow:0 3px 12px rgba(0,0,0,0.18),0 1px 3px rgba(0,0,0,0.10);transform:translateY(-1px)}
@@ -156,7 +156,20 @@ letter-spacing:.02em!important
 .sync-cloud .sync-dot{background:#1a7340}
 .sync-local .sync-dot{background:#c87b0a}
 .sync-loading .sync-dot{background:#ccc}
-.modal-popup{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.note-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:8px 18px;border-radius:12px;border:2px solid #888;background:#fff;color:#555;cursor:pointer;white-space:nowrap;transition:all .18s}
+.note-btn:hover{border-color:#555;background:#f5f5f3}
+.note-btn.on{background:#555;color:#fff;border-color:#555}
+/* NOTEBOOK PAGE */
+.notebook-page{display:none;padding:0}
+.notebook-page.active{display:block}
+.nb-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.nb-title{font-size:15px;font-weight:600;color:#1a1a1a;flex:1}
+.nb-save-btn{font-size:13px;font-weight:600;padding:6px 16px;border-radius:10px;border:2px solid #185FA5;background:#185FA5;color:#fff;cursor:pointer;white-space:nowrap}
+.nb-save-btn:hover{background:#0f4a8c}
+.nb-saved{font-size:12px;color:#888;white-space:nowrap}
+.nb-textarea{width:100%;min-height:420px;font-size:15px;line-height:1.75;padding:16px;border-radius:12px;border:1px solid #e0e0da;background:#fff;color:#1a1a1a;outline:none;resize:vertical;font-family:inherit}
+.nb-textarea:focus{border-color:#185FA5;box-shadow:0 0 0 2px rgba(24,95,165,0.10)}
+@media(max-width:600px){.nb-textarea{min-height:300px;font-size:14px}}
 @media(max-width:600px){
 col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{width:70px}
 .ev-name{font-size:14px!important}
@@ -167,16 +180,19 @@ col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{widt
 </head>
 <body>
 <div class="container">
-<h1>黃家100天行事曆</h1>
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+  <h1 style="margin-bottom:0">黃家100天行事曆</h1>
+  <span class="sync-badge sync-loading" id="sync-badge"><span class="sync-dot"></span><span id="sync-text">連線中</span></span>
+</div>
 <div class="top-bar">
-  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-    <div class="view-toggle">
-      <button class="view-btn" onclick="setView('month',this)">📅 月曆</button>
-      <button class="view-btn on" onclick="setView('list',this)">📋 行事曆</button>
-    </div>
-    <span class="sync-badge sync-loading" id="sync-badge"><span class="sync-dot"></span><span id="sync-text">連線中</span></span>
+  <div class="view-toggle">
+    <button class="view-btn" onclick="setView('month',this)">📅 月曆</button>
+    <button class="view-btn on" onclick="setView('list',this)">📋 行事曆</button>
   </div>
+</div>
+<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
   <button class="global-add-btn" id="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
+  <button class="note-btn" id="note-page-btn" onclick="toggleNotebook(this)">📓 記事本</button>
 </div>
 <div class="stats">
   <div class="stat on" id="stat-all" onclick="setSchedCard('all')"><div class="stat-label">總天數</div><div class="stat-num" id="stotal">100</div></div>
@@ -192,6 +208,14 @@ col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{widt
   </div>
 </div>
 <div id="cal"></div>
+<div class="notebook-page" id="notebook-page">
+  <div class="nb-toolbar">
+    <span class="nb-title">📓 記事本</span>
+    <span class="nb-saved" id="nb-saved"></span>
+    <button class="nb-save-btn" onclick="saveNote()">儲存</button>
+  </div>
+  <textarea class="nb-textarea" id="nb-textarea" placeholder="在這裡記錄任何事情…&#10;&#10;支援多行文字，自動儲存在本機。"></textarea>
+</div>
 <div id="modal-container"></div>
 <div class="save-toast" id="toast">✓ 已儲存</div>
 </div>
@@ -961,6 +985,42 @@ function saveQuickEdit(){
   saveStore();
   closeQuickEdit();
   render();
+}
+// ===== 記事本 =====
+let _noteVisible=false;
+function toggleNotebook(btn){
+  _noteVisible=!_noteVisible;
+  const page=document.getElementById('notebook-page');
+  const calEl=document.getElementById('cal');
+  const stats=document.getElementById('filter-section');
+  const statsBar=document.querySelector('.stats');
+  const addBtn=document.getElementById('global-add-btn');
+  if(_noteVisible){
+    page.classList.add('active');
+    calEl.style.display='none';
+    if(stats) stats.style.display='none';
+    if(statsBar) statsBar.style.display='none';
+    btn.classList.add('on');
+    addBtn.style.display='none';
+    // 載入儲存的內容
+    const saved=localStorage.getItem('huang_notebook')||'';
+    document.getElementById('nb-textarea').value=saved;
+    document.getElementById('nb-saved').textContent='';
+  }else{
+    page.classList.remove('active');
+    calEl.style.display='';
+    if(stats) stats.style.display='';
+    if(statsBar) statsBar.style.display='';
+    btn.classList.remove('on');
+    addBtn.style.display='';
+  }
+}
+function saveNote(){
+  const text=document.getElementById('nb-textarea').value;
+  localStorage.setItem('huang_notebook',text);
+  const saved=document.getElementById('nb-saved');
+  saved.textContent='✓ 已儲存';
+  setTimeout(()=>{saved.textContent='';},2000);
 }
 
 </script>
