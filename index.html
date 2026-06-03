@@ -10,13 +10,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Helv
 .container{max-width:860px;margin:0 auto}
 h1{font-size:20px;font-weight:500;margin-bottom:20px;color:#1a1a1a}
 .top-bar{display:flex;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px}
-.view-toggle{display:flex;background:#e8e8e5;border-radius:999px;padding:4px;gap:0;border:1px solid #d8d8d4}
-.view-btn{font-size:15px;font-weight:600;padding:10px 28px;border-radius:999px;border:none;background:transparent;color:#888;cursor:pointer;transition:all .22s;letter-spacing:.02em;white-space:nowrap}
+.view-toggle{display:flex;background:#e8e8e5;border-radius:999px;padding:4px;gap:0;border:1px solid #d8d8d4;width:100%}
+.view-btn{flex:1;font-size:15px;font-weight:600;padding:10px 0;border-radius:999px;border:none;background:transparent;color:#888;cursor:pointer;transition:all .22s;letter-spacing:.02em;white-space:nowrap;text-align:center}
 .view-btn.on{background:#F5C842;color:#185FA5;box-shadow:0 3px 12px rgba(0,0,0,0.18),0 1px 3px rgba(0,0,0,0.10);transform:translateY(-1px)}
-.global-add-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:8px 18px;border-radius:12px;border:2px solid #185FA5;background:#185FA5;color:#fff;cursor:pointer;white-space:nowrap}
+.global-add-btn{flex:1;justify-content:center;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:10px 0;border-radius:12px;border:2px solid #185FA5;background:#185FA5;color:#fff;cursor:pointer;white-space:nowrap}
 .global-add-btn:hover{background:#0f4a8c}
-.stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.stat{background:#fff;border-radius:10px;padding:6px 16px;text-align:center;min-width:72px;border:0.5px solid #e0e0da;cursor:pointer;transition:all .2s;user-select:none}
+.stats{display:flex;gap:10px;margin-bottom:16px;width:100%}
+.stat{flex:1;background:#fff;border-radius:10px;padding:6px 0;text-align:center;border:0.5px solid #e0e0da;cursor:pointer;transition:all .2s;user-select:none}
 .stat:hover{border-color:#aaa;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 .stat.on{background:#555;border-color:#555;box-shadow:0 3px 12px rgba(0,0,0,0.22)}
 .stat.on .stat-label{color:#ddd}
@@ -24,10 +24,10 @@ h1{font-size:20px;font-weight:500;margin-bottom:20px;color:#1a1a1a}
 .stat-label{font-size:11px;color:#888;margin-bottom:2px}
 .stat-num{font-size:20px;font-weight:600;color:#1a1a1a}
 .filter-section{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
-.filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.filter-row{display:flex;gap:8px;width:100%}
 .sched-btn{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid #888;background:transparent;color:#555;cursor:pointer;transition:all .18s;font-weight:500}
 .sched-btn.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
-.who-btn{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid transparent;cursor:pointer;transition:all .18s;font-weight:500}
+.who-btn{flex:1;font-size:13px;padding:8px 0;border-radius:20px;border:2px solid transparent;cursor:pointer;transition:all .18s;font-weight:500;text-align:center;white-space:nowrap}
 .who-d{background:#EAF3FC;color:#0C447C;border-color:#B5D4F4}.who-d.on{background:#185FA5;color:#fff;border-color:#185FA5;box-shadow:0 2px 8px rgba(24,95,165,0.35)}
 .who-a{background:#FEF3E2;color:#633806;border-color:#FAC775}.who-a.on{background:#C87B0A;color:#fff;border-color:#C87B0A;box-shadow:0 2px 8px rgba(200,123,10,0.35)}
 .who-c{background:#EEF7E3;color:#27500A;border-color:#C0DD97}.who-c.on{background:#3A7A10;color:#fff;border-color:#3A7A10;box-shadow:0 2px 8px rgba(58,122,16,0.35)}
@@ -156,7 +156,7 @@ letter-spacing:.02em!important
 .sync-cloud .sync-dot{background:#1a7340}
 .sync-local .sync-dot{background:#c87b0a}
 .sync-loading .sync-dot{background:#ccc}
-.note-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:8px 18px;border-radius:12px;border:2px solid #888;background:#fff;color:#555;cursor:pointer;white-space:nowrap;transition:all .18s}
+.note-btn{flex:1;justify-content:center;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:10px 0;border-radius:12px;border:2px solid #888;background:#fff;color:#555;cursor:pointer;white-space:nowrap;transition:all .18s}
 .note-btn:hover{border-color:#555;background:#f5f5f3}
 .note-btn.on{background:#555;color:#fff;border-color:#555}
 /* NOTEBOOK PAGE */
@@ -191,8 +191,8 @@ col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{widt
   </div>
 </div>
 <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
-  <button class="global-add-btn" id="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
   <button class="note-btn" id="note-page-btn" onclick="toggleNotebook(this)">📓 記事本</button>
+  <button class="global-add-btn" id="global-add-btn" onclick="openAdd(event,null)">＋ 新增行程</button>
 </div>
 <div class="stats">
   <div class="stat on" id="stat-all" onclick="setSchedCard('all')"><div class="stat-label">總天數</div><div class="stat-num" id="stotal">100</div></div>
@@ -209,12 +209,7 @@ col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{widt
 </div>
 <div id="cal"></div>
 <div class="notebook-page" id="notebook-page">
-  <div class="nb-toolbar">
-    <span class="nb-title">📓 記事本</span>
-    <span class="nb-saved" id="nb-saved"></span>
-    <button class="nb-save-btn" onclick="saveNote()">儲存</button>
-  </div>
-  <textarea class="nb-textarea" id="nb-textarea" placeholder="在這裡記錄任何事情…&#10;&#10;支援多行文字，自動儲存在本機。"></textarea>
+  <textarea class="nb-textarea" id="nb-textarea" placeholder=""></textarea>
 </div>
 <div id="modal-container"></div>
 <div class="save-toast" id="toast">✓ 已儲存</div>
@@ -1004,8 +999,9 @@ function toggleNotebook(btn){
     addBtn.style.display='none';
     // 載入儲存的內容
     const saved=localStorage.getItem('huang_notebook')||'';
-    document.getElementById('nb-textarea').value=saved;
-    document.getElementById('nb-saved').textContent='';
+    const ta=document.getElementById('nb-textarea');
+    ta.value=saved;
+    ta.oninput=function(){ localStorage.setItem('huang_notebook',this.value); };
   }else{
     page.classList.remove('active');
     calEl.style.display='';
@@ -1014,13 +1010,6 @@ function toggleNotebook(btn){
     btn.classList.remove('on');
     addBtn.style.display='';
   }
-}
-function saveNote(){
-  const text=document.getElementById('nb-textarea').value;
-  localStorage.setItem('huang_notebook',text);
-  const saved=document.getElementById('nb-saved');
-  saved.textContent='✓ 已儲存';
-  setTimeout(()=>{saved.textContent='';},2000);
 }
 
 </script>
