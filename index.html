@@ -379,9 +379,37 @@ function setSyncBadge(mode){
 }
 
 
+// ===== 清理過期資料 =====
+
+function pruneOldData(){
+  const cutoff=dk(calStart);
+  // 清理 extraEvs（手動新增的行程，日期早於今天的全刪）
+  for(const key of Object.keys(extraEvs)){
+    if(key<cutoff) delete extraEvs[key];
+  }
+  // 清理 overrideEvs（只保留仍有效的行程 id）
+  const validBaseIds=new Set(
+    Object.values(BASE_FIX).flat().map(e=>String(e.id))
+  );
+  const validExtraIds=new Set(
+    Object.values(extraEvs).flat().map(e=>String(e.id))
+  );
+  for(const id of Object.keys(overrideEvs)){
+    if(!validBaseIds.has(id)&&!validExtraIds.has(id)){
+      delete overrideEvs[id];
+    }
+  }
+  // 清理 deletedIds（只保留仍在 BASE_FIX 中的 id，其餘已過期不需記錄）
+  for(const id of [...deletedIds]){
+    if(!validBaseIds.has(id)) deletedIds.delete(id);
+  }
+}
+
 // ===== 儲存 =====
 
 async function saveStore(){
+
+  pruneOldData();
 
   const data = {
 
@@ -747,10 +775,10 @@ function showModal(title,dateVal,ev,triggerEl){
       ${del?`<div style="flex-shrink:0;padding-bottom:${ev?'18px':'2px'}">${del}</div>`:''}
     </div>
     <div class="mf"><label>人物</label><select id="m-who">${whoOpts}</select></div>
-    <div class="mf"><label>事件</label><input type="text" id="m-ev" value="${ev?ev.ev:''}" placeholder=""></div>
+    <div class="mf"><label>事件</label><input type="text" id="m-ev" value="${ev?ev.ev:''}" placeholder="事件名稱"></div>
     <div class="mf-row">
-      <div class="mf"><label>時間</label><input type="text" id="m-time" value="${ev?ev.time||'':''}" placeholder=""></div>
-      <div class="mf"><label>地點</label><input type="text" id="m-loc" value="${ev?ev.loc||'':''}" placeholder=""></div>
+      <div class="mf"><label>時間</label><input type="text" id="m-time" value="${ev?ev.time||'':''}" placeholder="14:00"></div>
+      <div class="mf"><label>地點</label><input type="text" id="m-loc" value="${ev?ev.loc||'':''}" placeholder="地點"></div>
     </div>
     <div class="mf-row">
       <div class="mf"><label>對象</label><input type="text" id="m-target" value="${ev?ev.target||'':''}" placeholder=""></div>
