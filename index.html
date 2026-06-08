@@ -449,6 +449,14 @@ function showToast(){
 }
 
 
+// ===== 每天凌晨00:00:01滾動更新第100天 =====
+
+function scheduleMidnight(){
+  const now=new Date();
+  const next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,1);
+  setTimeout(()=>{render();scheduleMidnight();},next-now);
+}
+
 // ===== 初始化 =====
 
 (async()=>{
@@ -456,6 +464,8 @@ function showToast(){
   await loadStore();
 
   render();
+
+  scheduleMidnight();
 
 })();
 
@@ -646,7 +656,8 @@ function buildList(){
       const evs=getAllEvs(d);
       const dow=d.getDay();const cls=dow===0?'sun':dow===6?'sat':'';
       const hasEv=evs.length>0;
-      if(!julAug&&!hasEv) continue;
+      const isDay100=d.getTime()===calEnd.getTime();
+      if(!julAug&&!isDay100&&!hasEv) continue;
       let fEvs=activeWho?evs.filter(e=>e.w===activeWho):evs;
       if(activeWho&&fEvs.length===0) continue;
       if(!activeWho){if(activeSchedule==='has'&&!hasEv) continue;if(activeSchedule==='none'&&hasEv) continue;}
@@ -736,10 +747,10 @@ function showModal(title,dateVal,ev,triggerEl){
       ${del?`<div style="flex-shrink:0;padding-bottom:${ev?'18px':'2px'}">${del}</div>`:''}
     </div>
     <div class="mf"><label>人物</label><select id="m-who">${whoOpts}</select></div>
-    <div class="mf"><label>事件</label><input type="text" id="m-ev" value="${ev?ev.ev:''}" placeholder="事件名稱"></div>
+    <div class="mf"><label>事件</label><input type="text" id="m-ev" value="${ev?ev.ev:''}" placeholder=""></div>
     <div class="mf-row">
-      <div class="mf"><label>時間</label><input type="text" id="m-time" value="${ev?ev.time||'':''}" placeholder="14:00"></div>
-      <div class="mf"><label>地點</label><input type="text" id="m-loc" value="${ev?ev.loc||'':''}" placeholder="地點"></div>
+      <div class="mf"><label>時間</label><input type="text" id="m-time" value="${ev?ev.time||'':''}" placeholder=""></div>
+      <div class="mf"><label>地點</label><input type="text" id="m-loc" value="${ev?ev.loc||'':''}" placeholder=""></div>
     </div>
     <div class="mf-row">
       <div class="mf"><label>對象</label><input type="text" id="m-target" value="${ev?ev.target||'':''}" placeholder=""></div>
