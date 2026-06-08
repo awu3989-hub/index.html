@@ -250,8 +250,8 @@ const ORIG_START=new Date(2026,4,24);
 
 // 永遠維持「今天開始往後 100 天」
 // 若今天尚未到原始開始日，則仍從原始日開始
-const calStart=TODAY>ORIG_START?new Date(TODAY):new Date(ORIG_START);
-const calEnd=addDays(calStart,99);
+let calStart=TODAY>ORIG_START?new Date(TODAY):new Date(ORIG_START);
+let calEnd=addDays(calStart,99);
 
 // ===== Google Sheet API =====
 
@@ -482,7 +482,13 @@ function showToast(){
 function scheduleMidnight(){
   const now=new Date();
   const next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,1);
-  setTimeout(()=>{render();scheduleMidnight();},next-now);
+  setTimeout(()=>{
+    const newToday=new Date();newToday.setHours(0,0,0,0);
+    TODAY.setTime(newToday.getTime());
+    rebuildCalDays();
+    render();
+    scheduleMidnight();
+  },next-now);
 }
 
 // ===== 初始化 =====
@@ -611,13 +617,28 @@ function getAllEvs(dt){
 let evById={};
 function rebuildEvById(){evById={};allDays.forEach(({d})=>getAllEvs(d).forEach(e=>evById[String(e.id)]=e));}
 
-const allDays=[];
-for(let i=0;i<100;i++){const d=addDays(calStart,i);d.setHours(0,0,0,0);allDays.push({d});}
 const MN_MAP={0:'1月',1:'2月',2:'3月',3:'4月',4:'5月',5:'6月',6:'7月',7:'8月',8:'9月',9:'10月',10:'11月',11:'12月'};
 function monthKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)}
 function monthLabel(d){return d.getFullYear()+'年 '+MN_MAP[d.getMonth()]}
-const months={};
-allDays.forEach(r=>{const mk=monthKey(r.d);if(!months[mk]){months[mk]={label:monthLabel(r.d),days:[]};}months[mk].days.push(r);});
+
+let allDays=[];
+let months={};
+
+function rebuildCalDays(){
+  // 每次呼叫都重新計算 calStart/calEnd（TODAY可能已變）
+  const newStart=TODAY>ORIG_START?new Date(TODAY):new Date(ORIG_START);
+  // 更新 calStart / calEnd
+  calStart.setTime(newStart.getTime());
+  calEnd.setTime(addDays(calStart,99).getTime());
+
+  allDays=[];
+  for(let i=0;i<100;i++){const d=addDays(calStart,i);d.setHours(0,0,0,0);allDays.push({d});}
+  months={};
+  allDays.forEach(r=>{const mk=monthKey(r.d);if(!months[mk]){months[mk]={label:monthLabel(r.d),days:[]};}months[mk].days.push(r);});
+}
+
+// 初始建立
+rebuildCalDays();
 
 function updateStats(){
   const hasC=allDays.filter(r=>getAllEvs(r.d).length>0).length;
@@ -678,14 +699,11 @@ function buildList(){
   let html='';
   for(const mk of Object.keys(months)){
     const{label,days}=months[mk];
-    const julAug=mk.endsWith('-07')||mk.endsWith('-08');
     let rows='';
     for(const{d}of days){
       const evs=getAllEvs(d);
       const dow=d.getDay();const cls=dow===0?'sun':dow===6?'sat':'';
       const hasEv=evs.length>0;
-      const isDay100=d.getTime()===calEnd.getTime();
-      if(!julAug&&!isDay100&&!hasEv) continue;
       let fEvs=activeWho?evs.filter(e=>e.w===activeWho):evs;
       if(activeWho&&fEvs.length===0) continue;
       if(!activeWho){if(activeSchedule==='has'&&!hasEv) continue;if(activeSchedule==='none'&&hasEv) continue;}
