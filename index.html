@@ -43,8 +43,6 @@ h1{font-size:20px;font-weight:500;margin-bottom:20px;color:#1a1a1a}
 .stat-num{font-size:22px;font-weight:600;color:#1a1a1a}
 .filter-section{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
 .filter-row{display:flex;gap:8px;width:100%}
-.sched-btn{font-size:13px;padding:6px 16px;border-radius:20px;border:2px solid #888;background:transparent;color:#555;cursor:pointer;transition:all .18s;font-weight:500}
-.sched-btn.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
 .who-btn{flex:1;font-size:14px;padding:10px 0;border-radius:20px;border:2px solid transparent;cursor:pointer;transition:all .18s;font-weight:600;text-align:center;white-space:nowrap}
 .who-d{background:#EAF3FC;color:#0C447C;border-color:#B5D4F4}.who-d.on{background:#185FA5;color:#fff;border-color:#185FA5;box-shadow:0 2px 8px rgba(24,95,165,0.35)}
 .who-a{background:#FEF3E2;color:#633806;border-color:#FAC775}.who-a.on{background:#C87B0A;color:#fff;border-color:#C87B0A;box-shadow:0 2px 8px rgba(200,123,10,0.35)}
@@ -70,7 +68,6 @@ tr:last-child td{border-bottom:none}
 .ev-title{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .ev-name{color:#1a1a1a;font-size:13px}
 .ev-meta{font-size:11px;color:#888;margin-top:2px;line-height:1.6}
-.edit-btn{display:none}
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;z-index:999;background:transparent}
 .modal-popup{position:fixed;z-index:1000;background:#fff;border-radius:14px;padding:18px;width:320px;max-width:94vw;border:0.5px solid #e0e0da;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
@@ -410,6 +407,7 @@ function pruneOldData(){
 async function saveStore(){
 
   pruneOldData();
+  markDirty();
 
   const data = {
 
@@ -438,42 +436,30 @@ async function saveStore(){
 
 
   // Google Sheet 同步
-
   try{
-
-await fetch(API_URL, {
-  method: 'POST',
-  body: JSON.stringify(data)
-});
-
+    await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    setSyncBadge('cloud');
+    showToast('✓ 已儲存');
   }catch(e){
-
     console.error('cloud save error',e);
     setSyncBadge('local');
-
+    showToast('⚠ 僅存本機');
   }
-
-  showToast();
 
 }
 
 
 // ===== 提示 =====
 
-function showToast(){
-
-  const t =
-    document.getElementById('toast');
-
+function showToast(msg){
+  const t=document.getElementById('toast');
   if(!t) return;
-
+  t.textContent=msg||'✓ 已儲存';
   t.classList.add('show');
-
-  setTimeout(
-    ()=>t.classList.remove('show'),
-    1800
-  );
-
+  setTimeout(()=>t.classList.remove('show'),1800);
 }
 
 
@@ -606,7 +592,14 @@ function getAllEvs(dt){
 }
 
 let evById={};
-function rebuildEvById(){evById={};allDays.forEach(({d})=>getAllEvs(d).forEach(e=>evById[String(e.id)]=e));}
+let _evByIdDirty=true;
+function markDirty(){_evByIdDirty=true;}
+function rebuildEvById(){
+  if(!_evByIdDirty) return;
+  evById={};
+  allDays.forEach(({d})=>getAllEvs(d).forEach(e=>evById[String(e.id)]=e));
+  _evByIdDirty=false;
+}
 
 const MN_MAP={0:'1月',1:'2月',2:'3月',3:'4月',4:'5月',5:'6月',6:'7月',7:'8月',8:'9月',9:'10月',10:'11月',11:'12月'};
 function monthKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)}
@@ -626,6 +619,7 @@ function rebuildCalDays(){
   for(let i=0;i<100;i++){const d=addDays(calStart,i);d.setHours(0,0,0,0);allDays.push({d});}
   months={};
   allDays.forEach(r=>{const mk=monthKey(r.d);if(!months[mk]){months[mk]={label:monthLabel(r.d),days:[]};}months[mk].days.push(r);});
+  markDirty();
 }
 
 // 初始建立
@@ -726,8 +720,7 @@ function buildMonthCal(){
         if(ci<firstDay||day>daysInMonth){html+='<td class="cal-cell empty"></td>';}
         else{
           const td=new Date(year,month,day);td.setHours(0,0,0,0);
-          const inW=td>=calStart&&td<=calEnd;
-          const isPast=!inW&&td<calStart;
+          const isPast=td<calStart;
           const isToday=td.getTime()===TODAY.getTime();
           const evs=getAllEvs(td);
           const dc=col===0?'sun':col===6?'sat':'';
@@ -786,10 +779,10 @@ function showModal(title,dateVal,ev,triggerEl){
       ${del?`<div style="flex-shrink:0;padding-bottom:${ev?'18px':'2px'}">${del}</div>`:''}
     </div>
     <div class="mf"><label>人物</label><select id="m-who">${whoOpts}</select></div>
-    <div class="mf"><label>事件</label><input type="text" id="m-ev" value="${ev?ev.ev:''}" placeholder="事件名稱"></div>
+    <div class="mf"><label>事件</label><input type="text" id="m-ev" value="${ev?ev.ev:''}" placeholder=""></div>
     <div class="mf-row">
-      <div class="mf"><label>時間</label><input type="text" id="m-time" value="${ev?ev.time||'':''}" placeholder="14:00"></div>
-      <div class="mf"><label>地點</label><input type="text" id="m-loc" value="${ev?ev.loc||'':''}" placeholder="地點"></div>
+      <div class="mf"><label>時間</label><input type="text" id="m-time" value="${ev?ev.time||'':''}" placeholder=""></div>
+      <div class="mf"><label>地點</label><input type="text" id="m-loc" value="${ev?ev.loc||'':''}" placeholder=""></div>
     </div>
     <div class="mf-row">
       <div class="mf"><label>對象</label><input type="text" id="m-target" value="${ev?ev.target||'':''}" placeholder=""></div>
@@ -990,10 +983,7 @@ function openQuickEdit(evt, dateKey, evId){
     </div>
   </div>`;
   const popup=document.getElementById('qe-popup');
-  popup.style.position='fixed';
-  popup.style.top='50%';
-  popup.style.left='50%';
-  popup.style.transform='translate(-50%,-50%)';
+  positionPopup(popup,evt.currentTarget);
   setTimeout(()=>{const inp=document.getElementById('qe-input');if(inp){inp.focus();inp.select();}},50);
 }
 
