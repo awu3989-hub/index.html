@@ -399,9 +399,9 @@ function pruneOldData(){
       delete overrideEvs[id];
     }
   }
-  // 清理 deletedIds（只保留仍在 BASE_FIX 中的 id，其餘已過期不需記錄）
+  // 清理 deletedIds（只保留仍在 BASE_FIX 或 extraEvs 中的 id）
   for(const id of [...deletedIds]){
-    if(!validBaseIds.has(id)) deletedIds.delete(id);
+    if(!validBaseIds.has(id)&&!validExtraIds.has(id)) deletedIds.delete(id);
   }
 }
 
@@ -570,16 +570,7 @@ function getBaseEvs(dt){
     calLabel:'家庭旅行'
   });
 
-  if((y===2026&&m===6&&d>=28)||(y===2026&&m===7&&d<=5)) ev.push({
-    id:makeStableId(['finalMatch',k]),
-    w:'a',
-    time:'',
-    loc:'台中朝馬足球場',
-    ev:'小學生足球賽決賽',
-    calLabel:'足球賽決賽'
-  });
-
-  if(y===2026&&m===7&&d===6) ev.push({
+  if((y===2026&&m===6&&d>=28)||(y===2026&&m===7&&d<=6)) ev.push({
     id:makeStableId(['finalMatch',k]),
     w:'a',
     time:'',
@@ -687,7 +678,6 @@ function setSchedCard(f){
   document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));
   render();
 }
-function setSched(f,btn){activeSchedule=f;activeWho='';document.querySelectorAll('.sched-btn').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render();}
 function setWho(w,btn){
   if(activeWho===w){activeWho='';btn.classList.remove('on');setSchedCard('all');}
   else{activeWho=w;activeSchedule='all';document.querySelectorAll('.stat').forEach(c=>c.classList.remove('on'));document.querySelectorAll('.who-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
@@ -753,7 +743,10 @@ function buildMonthCal(){
   document.getElementById('cal').innerHTML=html;updateStats();
 }
 
-function todayStr(){return dk(TODAY);}
+function openAdd(evt,dateKey){
+  _editDateKey=null;_editEvId=null;
+  showModal('新增行程',dateKey||dk(TODAY),null,evt?evt.currentTarget:null);
+}
 
 function positionPopup(popup,triggerEl){
   // 統一垂直置中＋最大高度，確保刪除/取消/儲存按鈕永遠可見
@@ -886,10 +879,6 @@ function handleDelEv(e, evIdToDelete){
 
 let _editDateKey=null,_editEvId=null,_clipBoard=null;
 
-function openAdd(evt,dateKey){
-  _editDateKey=null;_editEvId=null;
-  showModal('新增行程',dateKey||todayStr(),null,evt?evt.currentTarget:null);
-}
 function openEdit(evt,dateKey,evId){
   evt.stopPropagation();
   _editDateKey=dateKey;
@@ -970,32 +959,6 @@ function saveEv(){
     if(!extraEvs[dateVal]) extraEvs[dateVal]=[];
     extraEvs[dateVal].push({id:newId,w,ev:evName,calLabel,loc,time,target,note});
   }
-  saveStore();
-  document.getElementById('modal-container').innerHTML='';
-  render();
-}
-
-function deleteEv(){
-  if(!_editEvId){
-    closeModal();
-    return;
-  }
-
-  const confirmDelete=confirm('確定要刪除此行程嗎？\n刪除後將無法復原。');
-
-  if(!confirmDelete) return;
-
-  const isExtra=Object.values(extraEvs).some(arr=>arr.some(e=>String(e.id)===_editEvId));
-
-  if(isExtra){
-    for(const k of Object.keys(extraEvs)){
-      extraEvs[k]=extraEvs[k].filter(e=>String(e.id)!==_editEvId);
-    }
-  }else{
-    deletedIds.add(_editEvId);
-    delete overrideEvs[_editEvId];
-  }
-
   saveStore();
   document.getElementById('modal-container').innerHTML='';
   render();
