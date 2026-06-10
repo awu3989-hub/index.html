@@ -177,11 +177,6 @@ letter-spacing:.02em!important
 /* NOTEBOOK PAGE */
 .notebook-page{display:none;padding:0}
 .notebook-page.active{display:block}
-.nb-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.nb-title{font-size:15px;font-weight:600;color:#1a1a1a;flex:1}
-.nb-save-btn{font-size:13px;font-weight:600;padding:6px 16px;border-radius:10px;border:2px solid #185FA5;background:#185FA5;color:#fff;cursor:pointer;white-space:nowrap}
-.nb-save-btn:hover{background:#0f4a8c}
-.nb-saved{font-size:12px;color:#888;white-space:nowrap}
 .nb-textarea{width:100%;min-height:420px;font-size:15px;line-height:1.75;padding:16px;border-radius:12px;border:1px solid #e0e0da;background:#fff;color:#1a1a1a;outline:none;resize:vertical;font-family:inherit}
 .nb-textarea:focus{border-color:#185FA5;box-shadow:0 0 0 2px rgba(24,95,165,0.10)}
 @media(max-width:600px){.nb-textarea{min-height:300px;font-size:14px}}
@@ -200,6 +195,7 @@ col.c-plan{width:70px}col.c-date{width:48px}col.c-dow{width:44px}.plan-part{widt
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
   <h1 style="margin-bottom:0">100 行事曆</h1>
   <span class="sync-badge sync-loading" id="sync-badge"><span class="sync-dot"></span><span id="sync-text">連線中</span></span>
+  <button id="dev-toggle" onclick="toggleDevMode()" title="模擬模式：關閉（點擊開啟）" style="background:none;border:1px solid #d94f4f;cursor:pointer;font-size:11px;font-weight:600;opacity:0.35;padding:2px 6px;line-height:1.4;color:#d94f4f;border-radius:4px;user-select:none">模擬行程</button>
 </div>
 <div class="top-bar">
   <div class="view-toggle">
@@ -384,21 +380,18 @@ function pruneOldData(){
   for(const key of Object.keys(extraEvs)){
     if(key<cutoff) delete extraEvs[key];
   }
-  // 清理 overrideEvs（只保留仍有效的行程 id）
-  const validBaseIds=new Set(
-    Object.values(BASE_FIX).flat().map(e=>String(e.id))
-  );
+  // 清理 overrideEvs（只保留仍在 extraEvs 中的行程 id）
   const validExtraIds=new Set(
     Object.values(extraEvs).flat().map(e=>String(e.id))
   );
   for(const id of Object.keys(overrideEvs)){
-    if(!validBaseIds.has(id)&&!validExtraIds.has(id)){
+    if(!validExtraIds.has(id)){
       delete overrideEvs[id];
     }
   }
-  // 清理 deletedIds（只保留仍在 BASE_FIX 或 extraEvs 中的 id）
+  // 清理 deletedIds（只保留仍在 extraEvs 中的 id）
   for(const id of [...deletedIds]){
-    if(!validBaseIds.has(id)&&!validExtraIds.has(id)) deletedIds.delete(id);
+    if(!validExtraIds.has(id)) deletedIds.delete(id);
   }
 }
 
@@ -483,112 +476,73 @@ function scheduleMidnight(){
 
   await loadStore();
 
+  buildDevEvs();
   render();
 
   scheduleMidnight();
 
 })();
 
-const BASE_FIX={
-  '2026-05-24':[{w:'d',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽'},{w:'a',time:'12:00',loc:'華僑高中',ev:'小學生足球賽預賽'},{w:'a',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽'}],
-  '2026-05-26':[{w:'d',time:'',loc:'',ev:'期末考'}],
-  '2026-05-30':[{w:'d',time:'10:00',loc:'華僑高中',ev:'小學生足球賽預賽'},{w:'d',time:'14:00',loc:'華僑高中',ev:'小學生足球賽預賽'},{w:'a',time:'12:00',loc:'華僑高中',ev:'小學生足球賽預賽'}],
-  '2026-06-05':[{w:'d',time:'08:00',loc:'',ev:'蘆洲國中線上報到',calLabel:'線上報到'}],
-  '2026-06-07':[{w:'d',time:'',loc:'華僑高中',ev:'安聯小小世界盃預賽',calLabel:'世界盃預賽'}],
-  '2026-06-08':[{w:'d',time:'',loc:'華僑高中',ev:'安聯小小世界盃預賽',calLabel:'世界盃預賽'}],
-  '2026-06-12':[{w:'d',time:'',loc:'',ev:'國小畢業典禮',calLabel:'畢業典禮'}],
-  '2026-06-17':[{w:'a',time:'',loc:'',ev:'期末考'}],
-  '2026-06-18':[{w:'d',time:'09:00~10:30',loc:'',ev:'蘆洲國中新生入學測驗',calLabel:'新生測驗'}],
-  '2026-06-19':[{w:'d',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'},{w:'a',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'}],
-  '2026-06-20':[{w:'d',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'},{w:'a',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'}],
-  '2026-06-21':[{w:'d',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'},{w:'a',time:'',loc:'新莊田徑場',ev:'包中盃足球賽'}],
-  '2026-06-27':[{w:'a',time:'',loc:'台中朝馬足球場',ev:'小學生足球賽決賽',calLabel:'足球賽決賽'}],
-  '2026-07-12':[{w:'d',time:'09:00~10:00',loc:'',ev:'蘆洲國中新生編班',calLabel:'新生編班'}],
-  '2026-08-24':[{w:'d',time:'08:00~12:00',loc:'',ev:'蘆洲國中始業輔導',calLabel:'始業輔導'}],
-  '2026-08-25':[{w:'d',time:'08:00~12:00',loc:'',ev:'蘆洲國中始業輔導',calLabel:'始業輔導'}],
-  '2026-08-31':[{w:'d',time:'07:10',loc:'',ev:'蘆洲國中開學日',note:'全天上課',calLabel:'開學日'}],
-};
-let baseIdCounter=1000;
-Object.values(BASE_FIX).forEach(arr=>arr.forEach(e=>e.id=String(baseIdCounter++)));
+// ===== DEV_MODE：模擬行程開關 =====
+let DEV_MODE=false;
+let _devEvs={};   // { dateKey: [ev, ...] }
 
-function makeStableId(parts){
-  return parts.join('_').replace(/\s+/g,'');
+function buildDevEvs(){
+  _devEvs={};
+  if(!DEV_MODE) return;
+  // 依 calStart 產生散佈在 100 天內的模擬行程
+  const ws=['d','a','c','f'];
+  const sampleEvs=[
+    {ev:'模擬練球',calLabel:'練球',time:'09:00',loc:'蘆洲國小'},
+    {ev:'模擬比賽',calLabel:'比賽',time:'14:00',loc:'新莊田徑場'},
+    {ev:'模擬考試',calLabel:'考試',time:'08:30',loc:''},
+    {ev:'模擬家庭旅遊',calLabel:'旅遊',time:'',loc:'台中'},
+    {ev:'模擬校外教學',calLabel:'校外教學',time:'07:30',loc:'故宮'},
+    {ev:'模擬社團活動',calLabel:'社團',time:'15:00',loc:'活動中心'},
+  ];
+  // 每 7 天插入 2–3 筆，固定種子讓每次相同
+  for(let i=0;i<100;i+=Math.floor(3+i%4)){
+    const d=addDays(calStart,i);
+    const k=dk(d);
+    if(!_devEvs[k]) _devEvs[k]=[];
+    const sample=sampleEvs[i%sampleEvs.length];
+    const w=ws[i%ws.length];
+    const id='dev_'+k+'_'+i;
+    _devEvs[k].push({...sample,id,w});
+    // 偶爾多加一筆
+    if(i%6===0){
+      const s2=sampleEvs[(i+2)%sampleEvs.length];
+      const w2=ws[(i+1)%ws.length];
+      _devEvs[k].push({...s2,id:'dev2_'+k+'_'+i,w:w2});
+    }
+  }
 }
 
-function practiceAMPM(w,loc,dateKey){
-  return {
-    id:makeStableId(['practiceAMPM',w,loc,dateKey]),
-    w,
-    time:'09:00',
-    type:'group',
-    ev:'暑期練球（上午／下午）',
-    calLabel:'暑期練球(上/下)',
-    lines:[
-      {loc,time:'09:00–11:00'},
-      {loc,time:'14:00–17:00'}
-    ]
-  };
+function toggleDevMode(){
+  DEV_MODE=!DEV_MODE;
+  buildDevEvs();
+  const btn=document.getElementById('dev-toggle');
+  if(btn){
+    btn.title=DEV_MODE?'模擬模式：開啟（點擊關閉）':'模擬模式：關閉（點擊開啟）';
+    btn.style.opacity='1';
+    btn.style.background=DEV_MODE?'#d94f4f':'none';
+    btn.style.color=DEV_MODE?'#fff':'#d94f4f';
+    if(!DEV_MODE) btn.style.opacity='0.35';
+  }
+  markDirty();
+  render();
 }
 
-function practicePM(w,loc,dateKey){
-  return {
-    id:makeStableId(['practicePM',w,loc,dateKey]),
-    w,
-    time:'14:00',
-    type:'group',
-    ev:'暑期練球（下午）',
-    calLabel:'暑期練球(下)',
-    lines:[
-      {loc,time:'14:00–17:00'}
-    ]
-  };
-}
-
-function getBaseEvs(dt){
-  const k=dk(dt),y=dt.getFullYear(),m=dt.getMonth()+1,d=dt.getDate();
-  const ev=BASE_FIX[k]?BASE_FIX[k].map(e=>({...e})):[];
-  if(y===2026&&m===8&&d>=9&&d<=11) ev.push({
-    id:makeStableId(['familyTrip',k]),
-    w:'f',
-    time:'',
-    loc:'溪頭',
-    ev:'家庭旅行',
-    calLabel:'家庭旅行'
-  });
-
-  if((y===2026&&m===6&&d>=28)||(y===2026&&m===7&&d<=6)) ev.push({
-    id:makeStableId(['finalMatch',k]),
-    w:'a',
-    time:'',
-    loc:'台中朝馬足球場',
-    ev:'小學生足球賽決賽',
-    calLabel:'足球賽決賽'
-  });
-
-  if((y===2026&&m===7&&d===6)||(y===2026&&m===7&&d>=7&&d<=10)) ev.push(practiceAMPM('a','蘆洲國小',k));
-
-  if(y===2026&&m===7&&d>=13&&d<=23) ev.push(practicePM('a','蘆洲國小',k));
-
-  if(y===2026&&m===7&&d>=16&&d<=21) ev.push({
-    id:makeStableId(['hkMacauLeague',k]),
-    w:'d',
-    time:'',
-    loc:'廣州番禺區',
-    ev:'台港澳足球聯賽',
-    calLabel:'台港澳聯賽'
-  });
-
-  if(y===2026&&m===7&&d>=27&&d<=31) ev.push(practiceAMPM('a','蘆洲國小',k));
-
-  if(y===2026&&m===8&&d>=3&&d<=21) ev.push(practiceAMPM('a','蘆洲國小',k));
-  return ev;
+function getBaseEvs(){
+  return [];  // 固定行程已清除，未來由雲端 extraEvs 驅動
 }
 
 function getAllEvs(dt){
   const k=dk(dt);
-  const base=getBaseEvs(dt).filter(e=>!deletedIds.has(String(e.id))).map(e=>overrideEvs[String(e.id)]?{...e,...overrideEvs[String(e.id)],id:String(e.id)}:e);
+  const base=getBaseEvs().filter(e=>!deletedIds.has(String(e.id))).map(e=>overrideEvs[String(e.id)]?{...e,...overrideEvs[String(e.id)],id:String(e.id)}:e);
   const extra=(extraEvs[k]||[]).filter(e=>!deletedIds.has(String(e.id)));
-  return [...base,...extra].sort((a,b)=>sortKey(a.time)-sortKey(b.time));
+  const dev=DEV_MODE?(_devEvs[k]||[]):[];
+  return [...base,...extra,...dev].sort((a,b)=>sortKey(a.time)-sortKey(b.time));
 }
 
 let evById={};
@@ -619,6 +573,7 @@ function rebuildCalDays(){
   for(let i=0;i<100;i++){const d=addDays(calStart,i);d.setHours(0,0,0,0);allDays.push({d});}
   months={};
   allDays.forEach(r=>{const mk=monthKey(r.d);if(!months[mk]){months[mk]={label:monthLabel(r.d),days:[]};}months[mk].days.push(r);});
+  buildDevEvs();
   markDirty();
 }
 
