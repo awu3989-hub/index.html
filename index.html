@@ -606,7 +606,7 @@ function renderEvLine(e,dateKey){
 
   const metaParts=[e.time,e.loc,e.target].filter(x=>x);
 
-  return `<div class="ev-title">${tag}<span class="ev-name">${e.ev}</span></div>${metaParts.length?`<div class="ev-meta">${metaParts.join('・')}</div>`:''}`;
+  return `<div class="ev-title">${tag}<span class="ev-name">${e.ev}</span>${e.starred?'<span style="font-size:13px;filter:drop-shadow(0 0 2px #f5a623)">⭐</span>':''}</div>${metaParts.length?`<div class="ev-meta">${metaParts.join('・')}</div>`:''}`;
 }
 
 let activeSchedule='all',activeWho='',activeView='list';
@@ -648,7 +648,7 @@ function buildList(){
       if(!activeWho){if(activeSchedule==='has'&&!hasEv) continue;if(activeSchedule==='none'&&hasEv) continue;}
       const dateKey=dk(d);
       let pairsHtml='';
-      if(fEvs.length){fEvs.forEach(e=>{pairsHtml+=`<div class="ev-plan-pair"><div class="ev-part">${renderEvLine(e,dateKey)}</div><div class="plan-part">${e.note||''}</div></div>`;});}
+      if(fEvs.length){fEvs.forEach(e=>{pairsHtml+=`<div class="ev-plan-pair"><div class="ev-part">${renderEvLine(e,dateKey)}</div><div class="plan-part">${e.starred?'<span style="font-size:14px;filter:drop-shadow(0 0 2px #f5a623)">⭐</span> ':''}<span>${e.note||''}</span></div></div>`;});}
       else{pairsHtml=`<div class="ev-plan-pair"><div class="ev-part"><span class="muted">—</span></div><div class="plan-part"></div></div>`;}
       rows+=`<tr class="${cls}"><td class="date-td">${pad(d.getMonth()+1)}/${pad(d.getDate())}</td><td class="dow-td">週${DOW[dow]}</td><td colspan="2" style="padding:0;border-bottom:0.5px solid #f0f0ec">${pairsHtml}</td></tr>`;
     }
@@ -714,10 +714,17 @@ function positionPopup(popup,triggerEl){
 function showModal(title,dateVal,ev,triggerEl){
   const whoOpts=['d','a','c','f'].map(w=>`<option value="${w}"${ev&&ev.w===w?' selected':''}>${tlabel(w)}</option>`).join('');
   const del=ev?`<button class="btn-del" id="btn-del-ev" onclick="handleDelEv(event,'${ev.id}')">🗑 刪除行程</button>`:'';
+  const isStarred=ev&&ev.starred||false;
+  const starStyle=isStarred
+    ?'font-size:22px;line-height:1;background:none;border:none;cursor:pointer;padding:0;transition:all .18s;filter:drop-shadow(0 0 3px #f5a623)'
+    :'font-size:16px;line-height:1;background:none;border:none;cursor:pointer;padding:0;opacity:0.25;transition:all .18s';
   document.getElementById('modal-container').innerHTML=`
   <div class="modal-overlay" onclick="closeModal()"></div>
   <div class="modal-popup" id="modal-popup">
-    <h3>${title}</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px">
+      <h3 style="margin-bottom:0">${title}</h3>
+      <button id="m-star-title" onclick="toggleModalStar()" style="${starStyle}" title="標記重要行程">⭐</button>
+    </div>
     <div class="mf" style="display:flex;align-items:flex-end;gap:8px">
       <div style="flex:1">
         <label>日期</label>
@@ -741,7 +748,10 @@ function showModal(title,dateVal,ev,triggerEl){
     </div>
     <div class="mf-row">
       <div class="mf"><label>對象</label><input type="text" id="m-target" value="${ev?ev.target||'':''}" placeholder=""></div>
-      <div class="mf"><label>註記</label><input type="text" id="m-note" value="${ev?ev.note||'':''}" placeholder=""></div>
+      <div class="mf">
+        <label>註記</label>
+        <input type="text" id="m-note" value="${ev?ev.note||'':''}" placeholder="">
+      </div>
     </div>
     <div class="mf"><label>月曆簡記</label><input type="text" id="m-cal" value="${ev?ev.calLabel||'':''}" placeholder="月曆顯示的簡短文字"><div class="hint">留空則自動使用事件名稱</div></div>
     <div class="cp-bar">
@@ -753,6 +763,27 @@ function showModal(title,dateVal,ev,triggerEl){
   </div>`;
   positionPopup(document.getElementById('modal-popup'),triggerEl);
 
+  // ── 星星狀態 ──
+  let _starred=isStarred;
+  function syncStarBtns(){
+    const btn=document.getElementById('m-star-title');
+    if(!btn) return;
+    if(_starred){
+      btn.style.fontSize='22px';
+      btn.style.opacity='1';
+      btn.style.filter='drop-shadow(0 0 3px #f5a623)';
+    } else {
+      btn.style.fontSize='16px';
+      btn.style.opacity='0.25';
+      btn.style.filter='none';
+    }
+  }
+  window.toggleModalStar=function(){
+    _starred=!_starred;
+    syncStarBtns();
+  };
+  window._getModalStarred=function(){ return _starred; };
+
   // ── 複製 / 貼上 / 取消 ──
   function getModalFields(){
     return {
@@ -762,7 +793,8 @@ function showModal(title,dateVal,ev,triggerEl){
       loc: document.getElementById('m-loc').value,
       target: document.getElementById('m-target').value,
       note: document.getElementById('m-note').value,
-      calLabel: document.getElementById('m-cal').value
+      calLabel: document.getElementById('m-cal').value,
+      starred: _starred
     };
   }
   function setModalFields(d){
@@ -773,6 +805,7 @@ function showModal(title,dateVal,ev,triggerEl){
     document.getElementById('m-target').value = d.target||'';
     document.getElementById('m-note').value = d.note||'';
     document.getElementById('m-cal').value = d.calLabel||'';
+    if(typeof d.starred!=='undefined'){ _starred=!!d.starred; syncStarBtns(); }
   }
   function flashBtn(btn, msg){
     const orig=btn.textContent;
@@ -886,6 +919,7 @@ function saveEv(){
   const time=document.getElementById('m-time').value.trim();
   const target=document.getElementById('m-target').value.trim();
   const note=document.getElementById('m-note').value.trim();
+  const starred=typeof window._getModalStarred==='function'?window._getModalStarred():false;
   if(!evName){alert('請輸入事件名稱');return;}
   const calLabel=calLabelInput||(evName.length>6?evName.slice(0,6)+'…':evName);
   if(_editEvId){
@@ -894,18 +928,18 @@ function saveEv(){
       for(const k of Object.keys(extraEvs)){
         const idx=extraEvs[k].findIndex(e=>String(e.id)===_editEvId);
         if(idx>=0){
-          if(k!==dateVal){extraEvs[k].splice(idx,1);if(!extraEvs[dateVal])extraEvs[dateVal]=[];extraEvs[dateVal].push({id:_editEvId,w,ev:evName,calLabel,loc,time,target,note});}
-          else{extraEvs[k][idx]={id:_editEvId,w,ev:evName,calLabel,loc,time,target,note};}
+          if(k!==dateVal){extraEvs[k].splice(idx,1);if(!extraEvs[dateVal])extraEvs[dateVal]=[];extraEvs[dateVal].push({id:_editEvId,w,ev:evName,calLabel,loc,time,target,note,starred});}
+          else{extraEvs[k][idx]={id:_editEvId,w,ev:evName,calLabel,loc,time,target,note,starred};}
           break;
         }
       }
     } else {
-      overrideEvs[_editEvId]={w,ev:evName,calLabel,loc,time,target,note};
+      overrideEvs[_editEvId]={w,ev:evName,calLabel,loc,time,target,note,starred};
     }
   } else {
     const newId=String(evIdCounter++);
     if(!extraEvs[dateVal]) extraEvs[dateVal]=[];
-    extraEvs[dateVal].push({id:newId,w,ev:evName,calLabel,loc,time,target,note});
+    extraEvs[dateVal].push({id:newId,w,ev:evName,calLabel,loc,time,target,note,starred});
   }
   saveStore();
   document.getElementById('modal-container').innerHTML='';
